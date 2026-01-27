@@ -1,17 +1,8 @@
-FROM node:20 AS build
+FROM node:20-alpine
 WORKDIR /app
-
 COPY package*.json ./
-RUN npm ci
-
+RUN npm install
 COPY . .
-RUN npm run build
 
-FROM nginx:alpine
-
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# ВАЖНО: путь до browser
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
-
-EXPOSE 80
+RUN npm install -g @angular/cli
+EXPOSE 4200 4201

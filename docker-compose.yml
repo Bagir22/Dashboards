@@ -1,28 +1,39 @@
-version: "3.9"
-
 services:
-  postgres:
-    image: postgres:16
-    env_file: .env
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  backend:
-    build:
-      context: ./backend/Dashboards
-    env_file: .env
+  host-app:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
+      - "${HOST_PORT}:${HOST_PORT}"
+    environment:
+      - MFT_URL=${MFT_URL}
+    command: npx ng serve host --host 0.0.0.0 --port ${HOST_PORT} --disable-host-check
+    networks:
+      - app-network
 
-  frontend:
-    build:
+  dashboards-mft:
+    build: 
       context: ./frontend
     ports:
-      - "80:80"
-    depends_on:
-      - backend
+      - "${MFT_PORT}:${MFT_PORT}"
+    environment:
+      - METABASE_URL=${METABASE_URL}
+      - METABASE_DASHBOARD_ID=${METABASE_DASHBOARD_ID}
+    command: npx ng serve dashboards-mft --host 0.0.0.0 --port ${MFT_PORT} --disable-host-check
+    networks:
+      - app-network
 
-volumes:
-  pgdata:
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase_service
+    ports:
+      - "${METABASE_PORT}:3000"
+    environment:
+      - MB_JETTY_HOST=0.0.0.0
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
