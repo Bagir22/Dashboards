@@ -1,17 +1,45 @@
-namespace Dashboards;
+using Application;
+using Hangfire;
+using Infrastructure;
+using Prometheus;
 
-public class Program
+namespace WebApi
 {
-    public static void Main(string[] args)
+    public class Program
     {
-        var builder = WebApplication.CreateBuilder(args);
-        builder.Configuration
-            .AddEnvironmentVariables();
-        
-        var app = builder.Build();
+        public static void Main( string[] args )
+        {
+            var builder = WebApplication.CreateBuilder( args );
 
-        app.MapGet("/", () => "Hello World!");
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            
+            builder.Services.AddHttpClient();
+            builder.Services.AddWebApi( builder.Configuration );
+            builder.Services.AddInfrastructure( builder.Configuration );
+            builder.Services.AddApplication();
 
-        app.Run();
+            var app = builder.Build();
+
+            app.MigrateInfrastructure();
+
+            app.MapHangfireDashboard();
+
+            if ( app.Environment.IsDevelopment() )
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseHttpMetrics();
+
+            app.MapControllers();
+
+            app.Run();
+        }
     }
 }
