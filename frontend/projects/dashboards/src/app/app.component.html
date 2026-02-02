@@ -1,0 +1,14 @@
+<div class="container">
+  <div class="iframe-wrapper" *ngIf="safeUrl; else loading">
+    <iframe
+      [src]="safeUrl"
+      width="100%"
+      height="600"
+      frameborder="0"
+      allowtransparency>
+    </iframe>
+  </div>
+  <ng-template #loading>
+    <p>Настройка дашборда...</p>
+  </ng-template>
+</div>

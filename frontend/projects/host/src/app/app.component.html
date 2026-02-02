@@ -1,8 +1,11 @@
 <div class="host-container">
-  <h1>Дашборды/h1>
+  <h1>Дашборды</h1>
 
-  <nav>
-    <button *ngFor="let mft of remotes" (click)="activeMft = mft">
+  <nav class="tabs">
+    <button
+      *ngFor="let mft of remotes"
+      (click)="activeMft = mft"
+      [class.active]="activeMft === mft">
       {{ mft.name }}
     </button>
   </nav>

@@ -6,27 +6,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-dashboards',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="container">
-      <div class="iframe-wrapper" *ngIf="safeUrl; else loading">
-        <iframe
-          [src]="safeUrl"
-          width="100%"
-          height="600"
-          frameborder="0"
-          allowtransparency>
-        </iframe>
-      </div>
-      <ng-template #loading>
-        <p>Настройка дашборда...</p>
-      </ng-template>
-    </div>
-  `,
-  styles: [`
-    .container { font-family: sans-serif; }
-    .iframe-wrapper { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: #fff; }
-    iframe { display: block; }
-  `],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit, OnChanges {
@@ -40,7 +21,7 @@ export class AppComponent implements OnInit, OnChanges {
     this.updateUrl();
   }
 
-  ngOnChanges(changes: any) {
+  ngOnChanges() {
     this.updateUrl();
   }
 

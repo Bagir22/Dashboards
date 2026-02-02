@@ -1,4 +1,4 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core'; // 1. Добавили NO_ERRORS_SCHEMA
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface RemoteConfig {
@@ -15,14 +15,15 @@ declare var process: { env: { [key: string]: string } };
   standalone: true,
   imports: [CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  templateUrl: './app.component.html'
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   remotes: RemoteConfig[] = [];
   activeMft: RemoteConfig | null = null;
 
   async ngOnInit() {
-    const rawEnv = process.env['DASHBOARDS'] || '';
+    const rawEnv = process.env['DASHBOARDS'];
     this.remotes = this.parseComplexEnv(rawEnv);
 
     if (this.remotes.length > 0) {
@@ -36,10 +37,8 @@ export class AppComponent implements OnInit {
         await this.loadRemoteScript(`${mft.url}/main.js`);
 
         await new Function(`return import('${mft.url}/remoteEntry.js')`)();
-
-        console.log(`✅ Loaded: ${mft.name}`);
       } catch (err) {
-        console.error(`❌ Error loading ${mft.name}:`, err);
+        console.error(`Error loading ${mft.name}:`, err);
       }
     }
   }
@@ -47,7 +46,7 @@ export class AppComponent implements OnInit {
   private parseComplexEnv(str: string): RemoteConfig[] {
     if (!str) return [];
     const items = str.split(';').map(s => s.trim());
-    const tempStorage: any = {};
+    const tempStorage: Record<string, any> = {};
 
     items.forEach(item => {
       const [rawKey, value] = item.split('=');
@@ -65,7 +64,6 @@ export class AppComponent implements OnInit {
 
     return Object.values(tempStorage) as RemoteConfig[];
   }
-
 
   private loadRemoteScript(url: string): Promise<void> {
     return new Promise((resolve, reject) => {
