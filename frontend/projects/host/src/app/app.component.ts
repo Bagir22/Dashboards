@@ -22,6 +22,8 @@ export class AppComponent implements OnInit {
   remotes: RemoteConfig[] = [];
   activeMft: RemoteConfig | null = null;
 
+  metabaseUrl = process.env['METABASE_URL']
+
   async ngOnInit() {
     const rawEnv = process.env['DASHBOARDS'];
     this.remotes = this.parseComplexEnv(rawEnv);
