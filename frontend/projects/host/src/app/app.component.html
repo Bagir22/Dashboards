@@ -2,15 +2,30 @@
   <div class="host-container">
     <h1 class="tui-text_h3">Дашборды</h1>
 
-    <tui-tabs [(activeItemIndex)]="activeIndex" class="tui-space_top-4">
-      <button
-        *ngFor="let mft of remotes"
-        tuiTab
+    <div class="header-row tui-space_top-4">
+      <tui-tabs [(activeItemIndex)]="activeIndex">
+        <button
+          *ngFor="let mft of remotes"
+          tuiTab
+          type="button"
+        >
+          {{ mft.name }}
+        </button>
+      </tui-tabs>
+
+      <a
+        tuiButton
         type="button"
+        appearance="secondary"
+        size="s"
+        iconStart="@tui.settings"
+        class="admin-button"
+        target="_blank"
+        [href]="metabaseAdminUrl"
       >
-        {{ mft.name }}
-      </button>
-    </tui-tabs>
+        Панель администрирования
+      </a>
+    </div>
 
     <div class="remote-slot tui-space_top-6" *ngIf="activeMft">
       <dashboards-mft

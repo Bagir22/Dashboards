@@ -4,15 +4,21 @@
   margin: 0 auto;
 }
 
-.tabs-container {
+.header-row {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
   border-bottom: 1px solid var(--tui-base-03);
-  padding-bottom: 1rem;
+  gap: 1rem;
 }
 
-.tab-button {
-  border-radius: 8px;
+tui-tabs {
+  border: none;
+}
+
+.admin-button {
+  margin-left: auto;
+  margin-bottom: 0.5rem;
 }
 
 .remote-slot {

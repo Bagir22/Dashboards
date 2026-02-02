@@ -1,6 +1,6 @@
 import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TuiRoot } from '@taiga-ui/core'; // Кнопка здесь
+import { TuiRoot, TuiButton } from '@taiga-ui/core';
 import { TuiTabs } from '@taiga-ui/kit';
 
 interface RemoteConfig {
@@ -18,7 +18,8 @@ declare var process: { env: { [key: string]: string } };
   imports: [
     CommonModule,
     TuiRoot,
-    TuiTabs
+    TuiTabs,
+    TuiButton
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
   templateUrl: './app.component.html',
@@ -28,6 +29,10 @@ export class AppComponent implements OnInit {
   remotes: RemoteConfig[] = [];
   activeMft: RemoteConfig | null = null;
   metabaseUrl = process.env['METABASE_URL'] || 'http://localhost:3000';
+
+  get metabaseAdminUrl(): string {
+    return `${this.metabaseUrl}/admin/`;
+  }
 
   get activeIndex(): number {
     return this.activeMft ? this.remotes.indexOf(this.activeMft) : 0;
@@ -49,7 +54,6 @@ export class AppComponent implements OnInit {
       try {
         await this.loadRemoteScript(`${mft.url}/remoteEntry.js`);
         await this.loadRemoteScript(`${mft.url}/main.js`);
-
         await new Function(`return import('${mft.url}/remoteEntry.js')`)();
       } catch (err) {
         console.error(`Error loading ${mft.name}:`, err);
@@ -59,24 +63,20 @@ export class AppComponent implements OnInit {
 
   private parseComplexEnv(str: string): RemoteConfig[] {
     if (!str) return [];
-    const items = str.split(';').map(s => s.trim());
-    const tempStorage: Record<string, any> = {};
-
-    items.forEach(item => {
+    return str.split(';').reduce((acc: any[], item) => {
       const [rawKey, value] = item.split('=');
-      if (!rawKey || !value) return;
+      if (!rawKey || !value) return acc;
+      const [key, index] = rawKey.trim().split('__');
+      const idx = parseInt(index, 10);
+      if (!acc[idx]) acc[idx] = {};
 
-      const [key, index] = rawKey.split('__');
-      if (!tempStorage[index]) tempStorage[index] = {};
-
-      const normalizedKey = key.toLowerCase();
-      if (normalizedKey === 'remoteurl') tempStorage[index].url = value;
-      else if (normalizedKey === 'mftid') tempStorage[index].mftid = value;
-      else if (normalizedKey === 'name') tempStorage[index].name = value;
-      else if (normalizedKey === 'path') tempStorage[index].path = value;
-    });
-
-    return Object.values(tempStorage) as RemoteConfig[];
+      const k = key.toLowerCase();
+      if (k === 'remoteurl') acc[idx].url = value;
+      else if (k === 'mftid') acc[idx].mftid = value;
+      else if (k === 'name') acc[idx].name = value;
+      else if (k === 'path') acc[idx].path = value;
+      return acc;
+    }, []).filter(Boolean);
   }
 
   private loadRemoteScript(url: string): Promise<void> {
