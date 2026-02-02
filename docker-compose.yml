@@ -6,8 +6,8 @@ services:
     ports:
       - "${HOST_PORT}:${HOST_PORT}"
     environment:
-      - MFT_URL=${MFT_URL}
-    command: npx ng serve host --host 0.0.0.0 --port ${HOST_PORT} --disable-host-check
+      - DASHBOARDS=${DASHBOARDS}
+    command: npx ng serve host --host 0.0.0.0 --port ${HOST_PORT} --disable-host-check --public-host http://localhost:${HOST_PORT} 
     networks:
       - app-network
 
@@ -15,11 +15,25 @@ services:
     build: 
       context: ./frontend
     ports:
-      - "${MFT_PORT}:${MFT_PORT}"
+      - "${MFT_DASH_PORT}:${MFT_DASH_PORT}"
     environment:
-      - METABASE_URL=${METABASE_URL}
-      - METABASE_DASHBOARD_ID=${METABASE_DASHBOARD_ID}
-    command: npx ng serve dashboards-mft --host 0.0.0.0 --port ${MFT_PORT} --disable-host-check
+      - METABASE_URL=http://localhost:${METABASE_PORT}
+      - METABASE_DASHBOARD_ID=${ID_DASHBOARD_1}
+      - MFT_URL=http://localhost:${MFT_DASH_PORT}
+    command: npx ng serve dashboards --host 0.0.0.0 --port ${MFT_DASH_PORT} --disable-host-check --live-reload false
+    networks:
+      - app-network
+
+  students-mft:
+    build: 
+      context: ./frontend
+    ports:
+      - "${MFT_STUD_PORT}:${MFT_STUD_PORT}"
+    environment:
+      - METABASE_URL=http://localhost:${METABASE_PORT}
+      - METABASE_DASHBOARD_ID=${ID_STUDENTS}
+      - MFT_URL=http://localhost:${MFT_STUD_PORT}
+    command: npx ng serve dashboards --host 0.0.0.0 --port ${MFT_STUD_PORT} --disable-host-check --live-reload false
     networks:
       - app-network
 

@@ -7,7 +7,7 @@ module.exports = {
   output: {
     //publicPath: 'auto',
     publicPath: `${MFT_URL}/`,
-    uniqueName: 'dashboards-mft',
+    uniqueName: 'dashboards',
     scriptType: 'text/javascript',
   },
   optimization: {
@@ -37,7 +37,7 @@ module.exports = {
       library: { type: 'module' },
       filename: 'remoteEntry.js',
       exposes: {
-        './web-components': './projects/dashboards-mft/src/bootstrap.ts',
+        './web-components': './projects/dashboards/src/bootstrap.ts',
       },
       shared: {
         "@angular/core": { singleton: true, strictVersion: false, eager: true },
@@ -49,7 +49,7 @@ module.exports = {
       }
     }),
     new webpack.DefinePlugin({
-      'process.env.METABASE_URL': JSON.stringify(process.env.METABASE_URL || 'http://localhost:3001'),
+      'process.env.METABASE_URL': JSON.stringify(process.env.METABASE_URL),
       'process.env.METABASE_DASHBOARD_ID': JSON.stringify(process.env.METABASE_DASHBOARD_ID || '')
     })
   ],

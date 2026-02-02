@@ -1,13 +1,18 @@
 <div class="host-container">
-  <h1>Host</h1>
+  <h1>Дашборды/h1>
 
-  <div class="remote-slot">
-    <dashboard-mft>Загрузка микрофронтенда...</dashboard-mft>
+  <nav>
+    <button *ngFor="let mft of remotes" (click)="activeMft = mft">
+      {{ mft.name }}
+    </button>
+  </nav>
+
+  <div class="remote-slot" *ngIf="activeMft">
+    <h2>{{ activeMft.name }}</h2>
+
+    <dashboards-mft
+      [attr.dashboard-id]="activeMft.mftid"
+      [attr.metabase-url]="'http://localhost:3000'">
+    </dashboards-mft>
   </div>
 </div>
-
-<style>
-  .host-container { border: 4px solid #007acc; padding: 20px; margin: 20px; font-family: sans-serif; }
-  .remote-slot { border: 4px dashed #ff4081; padding: 20px; margin-top: 20px; background: #fafafa; }
-  h1 { color: #007acc; }
-</style>

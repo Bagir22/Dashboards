@@ -1,8 +1,6 @@
 const webpack = require('webpack');
 const ModuleFederationPlugin = require('webpack').container.ModuleFederationPlugin;
 
-const MFT_URL = process.env['MFT_URL'] || 'http://localhost:4201';
-
 module.exports = {
   output: {
     publicPath: `auto`,
@@ -22,7 +20,6 @@ module.exports = {
       name: 'host',
       library: { type: 'module' },
       remotes: {
-        'dashboards-mft': `${MFT_URL}/remoteEntry.js`,
       },
       shared: {
         "@angular/core": { singleton: true, strictVersion: false, eager: true },
@@ -34,7 +31,7 @@ module.exports = {
       }
     }),
     new webpack.DefinePlugin({
-      'process.env.MFT_URL': JSON.stringify(MFT_URL)
+      'process.env.DASHBOARDS': JSON.stringify(process.env.DASHBOARDS)
     })
   ],
 };

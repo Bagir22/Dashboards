@@ -86,7 +86,7 @@
         }
       }
     },
-    "dashboards-mft": {
+    "dashboards": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -94,24 +94,24 @@
           "standalone": false
         }
       },
-      "root": "projects/dashboards-mft",
-      "sourceRoot": "projects/dashboards-mft/src",
+      "root": "projects/dashboards",
+      "sourceRoot": "projects/dashboards/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "customWebpackConfig": {
-              "path": "./projects/dashboards-mft/webpack.config.js"
+              "path": "./projects/dashboards/webpack.config.js"
             },
-            "outputPath": "dist/dashboards-mft",
-            "index": "projects/dashboards-mft/src/index.html",
-            "main": "projects/dashboards-mft/src/main.ts",
+            "outputPath": "dist/dashboards",
+            "index": "projects/dashboards/src/index.html",
+            "main": "projects/dashboards/src/main.ts",
             "polyfills": ["zone.js"],
-            "tsConfig": "projects/dashboards-mft/tsconfig.app.json",
+            "tsConfig": "projects/dashboards/tsconfig.app.json",
             "assets": [
-              "projects/dashboards-mft/src/favicon.ico",
-              "projects/dashboards-mft/src/assets"
+              "projects/dashboards/src/favicon.ico",
+              "projects/dashboards/src/assets"
             ],
             "styles": [
 
@@ -147,15 +147,15 @@
           "builder": "@angular-builders/custom-webpack:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "dashboards-mft:build:production"
+              "buildTarget": "dashboards:build:production"
             },
             "development": {
-              "buildTarget": "dashboards-mft:build:development",
+              "buildTarget": "dashboards:build:development"
             }
           },
           "defaultConfiguration": "development",
           "options": {
-            "buildTarget": "dashboards-mft:build",
+            "buildTarget": "dashboards:build",
             "port": 4201,
             "publicHost": "http://localhost:4201",
             "headers": {
@@ -169,7 +169,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "dashboards-mft:build"
+            "buildTarget": "dashboards:build"
           }
         }
       }

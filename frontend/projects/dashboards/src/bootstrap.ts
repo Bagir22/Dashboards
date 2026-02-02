@@ -15,8 +15,8 @@ import { AppComponent } from './app/app.component';
       injector: app.injector,
     });
 
-    if (!customElements.get('dashboard-mft')) {
-      customElements.define('dashboard-mft', dashboardElement);
+    if (!customElements.get('dashboards-mft')) {
+      customElements.define('dashboards-mft', dashboardElement);
     }
   } catch (err) {
     console.log(err);
