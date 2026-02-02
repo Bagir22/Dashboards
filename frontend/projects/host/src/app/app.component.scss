@@ -1,37 +1,30 @@
 .host-container {
-  padding: 20px;
-  font-family: sans-serif;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-  .tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 10px;
+.tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--tui-base-03);
+  padding-bottom: 1rem;
+}
 
-    button {
-      padding: 8px 16px;
-      cursor: pointer;
-      border: 1px solid #ddd;
-      background: #f9f9f9;
-      border-radius: 4px;
+.tab-button {
+  border-radius: 8px;
+}
 
-      &.active {
-        background: #007bff;
-        color: white;
-        border-color: #0056b3;
-      }
+.remote-slot {
+  background: #ffffff;
+  border: 1px solid var(--tui-base-03);
+  border-radius: var(--tui-radius-l);
+  min-height: 650px;
+  padding: 1rem;
+  box-shadow: var(--tui-shadow-m);
 
-      &:hover:not(.active) {
-        background: #eee;
-      }
-    }
-  }
-
-  .remote-slot {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px dashed #bbb;
-    border-radius: 8px;
+  dashboards-mft {
+    display: block;
+    width: 100%;
   }
 }

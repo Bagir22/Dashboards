@@ -34,8 +34,15 @@
               "projects/host/src/assets"
             ],
             "styles": [
-              "projects/host/src/styles.scss"
+              "projects/host/src/styles.scss",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-theme.less",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-fonts.less",
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules"
+              ]
+            },
             "scripts": []
           },
           "configurations": {

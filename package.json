@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@angular/animations": "^21.1.2",
+    "@angular/cdk": "^21.1.2",
+    "@ng-web-apis/common": "^5.0.3",
+    "@ng-web-apis/mutation-observer": "^5.0.3",
+    "@ng-web-apis/platform": "^5.0.3",
+    "@ng-web-apis/resize-observer": "^5.0.3",
+    "@ng-web-apis/screen-orientation": "^5.0.3",
+    "@taiga-ui/event-plugins": "^5.0.0",
+    "@taiga-ui/polymorpheus": "^5.0.0"
+  },
+  "devDependencies": {
+    "less": "^4.5.1",
+    "less-loader": "^12.3.0"
+  }
+}

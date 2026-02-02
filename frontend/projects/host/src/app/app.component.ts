@@ -1,5 +1,7 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TuiRoot } from '@taiga-ui/core'; // Кнопка здесь
+import { TuiTabs } from '@taiga-ui/kit';
 
 interface RemoteConfig {
   name: string;
@@ -13,21 +15,31 @@ declare var process: { env: { [key: string]: string } };
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [
+    CommonModule,
+    TuiRoot,
+    TuiTabs
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
   remotes: RemoteConfig[] = [];
   activeMft: RemoteConfig | null = null;
+  metabaseUrl = process.env['METABASE_URL'] || 'http://localhost:3000';
 
-  metabaseUrl = process.env['METABASE_URL']
+  get activeIndex(): number {
+    return this.activeMft ? this.remotes.indexOf(this.activeMft) : 0;
+  }
+
+  set activeIndex(index: number) {
+    this.activeMft = this.remotes[index];
+  }
 
   async ngOnInit() {
-    const rawEnv = process.env['DASHBOARDS'];
+    const rawEnv = process.env['DASHBOARDS'] || '';
     this.remotes = this.parseComplexEnv(rawEnv);
-
     if (this.remotes.length > 0) {
       this.activeMft = this.remotes[0];
     }

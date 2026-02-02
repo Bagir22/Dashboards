@@ -1,21 +1,22 @@
-<div class="host-container">
-  <h1>Дашборды</h1>
+<tui-root>
+  <div class="host-container">
+    <h1 class="tui-text_h3">Дашборды</h1>
 
-  <nav class="tabs">
-    <button
-      *ngFor="let mft of remotes"
-      (click)="activeMft = mft"
-      [class.active]="activeMft === mft">
-      {{ mft.name }}
-    </button>
-  </nav>
+    <tui-tabs [(activeItemIndex)]="activeIndex" class="tui-space_top-4">
+      <button
+        *ngFor="let mft of remotes"
+        tuiTab
+        type="button"
+      >
+        {{ mft.name }}
+      </button>
+    </tui-tabs>
 
-  <div class="remote-slot" *ngIf="activeMft">
-    <h2>{{ activeMft.name }}</h2>
-
-    <dashboards-mft
-      [attr.dashboard-id]="activeMft.mftid"
-      [attr.metabase-url]="metabaseUrl">
-    </dashboards-mft>
+    <div class="remote-slot tui-space_top-6" *ngIf="activeMft">
+      <dashboards-mft
+        [attr.dashboard-id]="activeMft.mftid"
+        [attr.metabase-url]="metabaseUrl">
+      </dashboards-mft>
+    </div>
   </div>
-</div>
+</tui-root>
