@@ -16,9 +16,11 @@ tui-tabs {
   border: none;
 }
 
-.admin-button {
-  margin-left: auto;
-  margin-bottom: 0.5rem;
+.admin-button {margin-left: auto;
+  align-self: center;
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
 }
 
 .remote-slot {
