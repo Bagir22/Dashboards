@@ -121,7 +121,9 @@
               "projects/dashboards/src/assets"
             ],
             "styles": [
-
+              "projects/dashboards/src/styles.scss",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-theme.less",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-fonts.less"
             ],
             "scripts": []
           },

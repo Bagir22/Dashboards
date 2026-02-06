@@ -1,13 +1,16 @@
 import 'zone.js';
-
 import { createApplication } from '@angular/platform-browser';
 import { createCustomElement } from '@angular/elements';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { NG_EVENT_PLUGINS } from '@taiga-ui/event-plugins';
 import { AppComponent } from './app/app.component';
 
 (async () => {
   try {
     const app = await createApplication({
       providers: [
+        provideAnimations(),
+        NG_EVENT_PLUGINS,
       ],
     });
 
@@ -19,6 +22,6 @@ import { AppComponent } from './app/app.component';
       customElements.define('dashboards-mft', dashboardElement);
     }
   } catch (err) {
-    console.log(err);
+    console.error('Ошибка инициализации Web Component:', err);
   }
 })();

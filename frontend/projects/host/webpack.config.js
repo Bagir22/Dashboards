@@ -32,7 +32,8 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env.DASHBOARDS': JSON.stringify(process.env.DASHBOARDS),
-      'process.env.METABASE_URL': JSON.stringify(process.env.METABASE_URL || 'http://localhost:3000')
+      'process.env.METABASE_URL': JSON.stringify(process.env.METABASE_URL),
+      'process.env.MFT_URL': JSON.stringify(process.env.MFT_URL)
     })
   ],
 };

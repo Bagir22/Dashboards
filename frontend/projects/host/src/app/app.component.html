@@ -1,35 +1,10 @@
 <tui-root>
-  <div class="host-container">
-    <h1 class="tui-text_h3">Дашборды</h1>
-
-    <div class="header-row tui-space_top-4">
-      <tui-tabs [(activeItemIndex)]="activeIndex">
-        <button
-          *ngFor="let mft of remotes"
-          tuiTab
-          type="button"
-        >
-          {{ mft.name }}
-        </button>
-      </tui-tabs>
-
-      <a
-        tuiButton
-        appearance="primary"
-        size="m"
-        class="admin-button"
-        target="_blank"
-        [href]="metabaseAdminUrl"
-      >
-        Панель администрирования
-      </a>
-    </div>
-
-    <div class="remote-slot tui-space_top-6" *ngIf="activeMft">
-      <dashboards-mft
-        [attr.dashboard-id]="activeMft.mftid"
-        [attr.metabase-url]="metabaseUrl">
-      </dashboards-mft>
-    </div>
+  <div style="padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end;">
+    <a tuiButton appearance="secondary" size="s" [href]="metabaseUrl + '/admin/'" target="_blank">
+      Панель администрирования
+    </a>
   </div>
+
+  <dashboards-mft>
+  </dashboards-mft>
 </tui-root>

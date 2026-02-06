@@ -1,14 +1,12 @@
-.container {
+@import '@taiga-ui/core/styles/taiga-ui-local';
+
+:host {
+  display: block;
   font-family: sans-serif;
 }
 
-.iframe-wrapper {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fff;
-
-  iframe {
-    display: block;
-  }
+tui-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1rem;
 }

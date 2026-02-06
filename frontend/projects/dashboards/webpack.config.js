@@ -1,11 +1,10 @@
 const webpack = require('webpack');
 const ModuleFederationPlugin = require('webpack').container.ModuleFederationPlugin;
 
-const MFT_URL = process.env['MFT_URL'] || 'http://localhost:4201';
+const MFT_URL = process.env['MFT_URL'];
 
 module.exports = {
   output: {
-    //publicPath: 'auto',
     publicPath: `${MFT_URL}/`,
     uniqueName: 'dashboards',
     scriptType: 'text/javascript',
@@ -49,8 +48,8 @@ module.exports = {
       }
     }),
     new webpack.DefinePlugin({
-      'process.env.METABASE_URL': JSON.stringify(process.env.METABASE_URL),
-      'process.env.METABASE_DASHBOARD_ID': JSON.stringify(process.env.METABASE_DASHBOARD_ID || '')
+      '__DASHBOARDS_CONFIG__': JSON.stringify(process.env.DASHBOARDS || ''),
+      '__METABASE_URL__': JSON.stringify(process.env.METABASE_URL || '')
     })
   ],
 };
