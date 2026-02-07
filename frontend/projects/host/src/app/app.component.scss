@@ -1,6 +1,6 @@
 .host-container {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -9,26 +9,25 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--tui-base-03);
+  padding-bottom: 1rem;
   gap: 1rem;
 }
 
-tui-tabs {
-  border: none;
-}
+.admin-button {
+  background-color: #0056b3;
+  color: #ffffff;
 
-.admin-button {margin-left: auto;
-  align-self: center;
-  text-align: center;
-  display: inline-flex;
-  justify-content: center;
+  &:hover {
+    background-color: #004494;
+  }
 }
 
 .remote-slot {
   background: #ffffff;
   border: 1px solid var(--tui-base-03);
   border-radius: var(--tui-radius-l);
-  min-height: 650px;
-  padding: 1rem;
+  min-height: 850px;
+  padding: 1.5rem;
   box-shadow: var(--tui-shadow-m);
 
   dashboards-mft {

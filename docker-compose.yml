@@ -26,6 +26,7 @@ services:
       MB_DB_PASS: ${POSTGRES_PASSWORD}
       MB_DB_HOST: db
       MB_JETTY_HOST: 0.0.0.0
+      MB_EMBEDDED_APP_ORIGIN: "http://${BASE_URL}:${HOST_PORT},http://${BASE_URL}:${MFT_DASH_PORT}"
     volumes:
       - ./metabase-data:/metabase-data 
     restart: unless-stopped
@@ -78,9 +79,12 @@ services:
     ports:
       - "${MFT_DASH_PORT}:${MFT_DASH_PORT}"
     environment:
-      - MFT_URL=http://localhost:${MFT_DASH_PORT}
+      - BASE_URL=${BASE_URL}
+      - METABASE_PORT=${METABASE_PORT}
+      - MFT_URL=http://${BASE_URL}:${MFT_DASH_PORT}
       - METABASE_URL=http://${BASE_URL}:${METABASE_PORT}
-      - DASHBOARDS=${DASHBOARDS}
+      - METABASE_USER=${METABASE_USER}
+      - METABASE_PASS=${METABASE_PASS}
     command: npx ng serve dashboards --host 0.0.0.0 --port ${MFT_DASH_PORT} --disable-host-check --live-reload false
     networks:
       - app-network

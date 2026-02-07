@@ -4,12 +4,14 @@ import { createCustomElement } from '@angular/elements';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { NG_EVENT_PLUGINS } from '@taiga-ui/event-plugins';
 import { AppComponent } from './app/app.component';
+import { provideHttpClient } from '@angular/common/http';
 
 (async () => {
   try {
     const app = await createApplication({
       providers: [
         provideAnimations(),
+        provideHttpClient(),
         NG_EVENT_PLUGINS,
       ],
     });

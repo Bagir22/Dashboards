@@ -1,10 +1,24 @@
 <tui-root>
-  <div style="padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end;">
-    <a tuiButton appearance="secondary" size="s" [href]="metabaseUrl + '/admin/'" target="_blank">
-      Панель администрирования
-    </a>
-  </div>
+  <div class="host-container">
+    <div class="header-row">
+      <h1 class="tui-text_h3">Дашборды</h1>
 
-  <dashboards-mft>
-  </dashboards-mft>
+      <a
+        tuiButton
+        appearance="primary"
+        size="m"
+        class="admin-button"
+        target="_blank"
+        [href]="metabaseAdminUrl"
+      >
+        Панель администрирования
+      </a>
+    </div>
+
+    <div class="remote-slot tui-space_top-6">
+      <dashboards-mft
+        [attr.metabase-url]="metabaseUrl">
+      </dashboards-mft>
+    </div>
+  </div>
 </tui-root>

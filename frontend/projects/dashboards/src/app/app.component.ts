@@ -1,24 +1,19 @@
 import {
   Component,
   Input,
-  OnChanges,
   OnInit,
-  SimpleChanges,
-  ViewEncapsulation,
   inject,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  ViewEncapsulation
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TuiTabs } from '@taiga-ui/kit';
+import { AppService, Dashboard } from './app.service';
 
-interface DashboardItem {
-  name: string;
-  mftid: string;
-}
-
-declare const __DASHBOARDS_CONFIG__: string;
-declare const __METABASE_URL__: string;
+declare const METABASE_URL: string;
+declare const METABASE_USER: string;
+declare const METABASE_PASS: string;
 
 @Component({
   selector: 'app-dashboards-root',
@@ -28,94 +23,69 @@ declare const __METABASE_URL__: string;
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class AppComponent implements OnInit, OnChanges {
-  @Input() config: string = '';
+export class AppComponent implements OnInit {
   @Input('metabase-url') metabaseUrl: string = '';
 
-  private sanitizer = inject(DomSanitizer);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly appService = inject(AppService);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  dashboards: DashboardItem[] = [];
-  _activeIndex = 0;
+  dashboards: Dashboard[] = [];
+  activeIndex = 0;
   safeUrl?: SafeResourceUrl;
+  isLoading = true;
 
-  get activeIndex(): number {
-    return this._activeIndex;
+  ngOnInit(): void {
+    void this.initialize();
   }
 
-  set activeIndex(value: number) {
-    this._activeIndex = value;
-    this.updateIframeUrl();
+  public onTabClick(index: number): void {
+    this.activeIndex = index;
+    this.updateIframe();
   }
 
-  ngOnInit() {
-    this.processConfig();
-  }
+  private async initialize(): Promise<void> {
+    const rawBaseUrl = this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : '');
+    const baseUrl = this.cleanUrl(rawBaseUrl);
 
-  ngOnChanges(changes: SimpleChanges) {
-    this.processConfig();
-  }
+    const auth = {
+      username: (typeof METABASE_USER !== 'undefined' ? METABASE_USER : '').replace(/"/g, ''),
+      password: (typeof METABASE_PASS !== 'undefined' ? METABASE_PASS : '').replace(/"/g, '')
+    };
 
-  private processConfig() {
-    let rawConfig = this.config;
-
-    if (!rawConfig) {
-      try {
-        rawConfig = __DASHBOARDS_CONFIG__;
-      } catch (e) {
-        console.warn(e);
-      }
-    }
-
-    if (!rawConfig) {
-      console.error('Dashboard configuration not found');
+    if (!baseUrl) {
+      console.error('Критическая ошибка: METABASE_URL не определен в окружении');
+      this.isLoading = false;
       return;
     }
 
-    rawConfig = rawConfig.replace(/^"|"$/g, '');
-
-    this.dashboards = this.parseEnvString(rawConfig);
-    if (this.dashboards.length > 0) {
-      this.updateIframeUrl();
-    }
-    this.cdr.detectChanges();
-  }
-
-  private updateIframeUrl() {
-    const activeDash = this.dashboards[this.activeIndex];
-    let baseUrl = this.metabaseUrl;
-
-    if (!baseUrl) {
-      try {
-        baseUrl = __METABASE_URL__.replace(/^"|"$/g, '');
-      } catch (e) {
-        console.warn(e);
+    try {
+      this.dashboards = await this.appService.fetchDashboards(baseUrl, auth);
+      if (this.dashboards.length > 0) {
+        this.updateIframe();
       }
-    }
-
-    if (activeDash?.mftid) {
-      const rawUrl = `${baseUrl}/public/dashboard/${activeDash.mftid}`;
-      this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(rawUrl);
+    } catch (e) {
+      console.error('Ошибка загрузки дашбордов:', e);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
-  private parseEnvString(str: string): DashboardItem[] {
-    if (!str) return [];
-    return str.split(';').reduce((acc: any[], item) => {
-      const parts = item.split('=');
-      if (parts.length < 2) return acc;
+  private updateIframe(): void {
+    const active = this.dashboards[this.activeIndex];
+    const rawBaseUrl = this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : '');
+    const baseUrl = this.cleanUrl(rawBaseUrl);
 
-      const [rawKey, value] = [parts[0].trim(), parts[1].trim()];
-      const [key, indexStr] = rawKey.split('__');
-      const idx = parseInt(indexStr, 10);
+    if (active?.mftid && baseUrl) {
+      const url = `${baseUrl}/public/dashboard/${active.mftid}`;
+      this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.cdr.detectChanges();
+    }
+  }
 
-      if (!acc[idx]) acc[idx] = {};
-
-      const k = key.toLowerCase();
-      if (k === 'name') acc[idx].name = value;
-      else if (k === 'mftid') acc[idx].mftid = value;
-
-      return acc;
-    }, []).filter(d => d.name && d.mftid);
+  private cleanUrl(url: any): string {
+    if (!url) return '';
+    return String(url).replace(/"/g, '').replace(/\/$/, '');
   }
 }

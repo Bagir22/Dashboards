@@ -2,6 +2,8 @@ const webpack = require('webpack');
 const ModuleFederationPlugin = require('webpack').container.ModuleFederationPlugin;
 
 const MFT_URL = process.env['MFT_URL'];
+const BASE_URL = process.env.BASE_URL || 'localhost';
+const MB_PORT = process.env.METABASE_PORT || '3000';
 
 module.exports = {
   output: {
@@ -48,8 +50,9 @@ module.exports = {
       }
     }),
     new webpack.DefinePlugin({
-      '__DASHBOARDS_CONFIG__': JSON.stringify(process.env.DASHBOARDS || ''),
-      '__METABASE_URL__': JSON.stringify(process.env.METABASE_URL || '')
+      METABASE_URL: JSON.stringify(`http://${BASE_URL}:${MB_PORT}`),
+      METABASE_USER: JSON.stringify(process.env.METABASE_USER || ''),
+      METABASE_PASS: JSON.stringify(process.env.METABASE_PASS || '')
     })
   ],
 };
