@@ -14,7 +14,13 @@ import { TuiRoot, TuiButton } from '@taiga-ui/core';
 export class AppComponent implements OnInit {
   metabaseUrl = String(process.env['METABASE_URL'] || '').replace(/"/g, '').replace(/\/$/, '');
   mftUrl = String(process.env['MFT_URL'] || '').replace(/"/g, '').replace(/\/$/, '');
-  
+
+  get isAdmin(): boolean {
+    const flag = localStorage.getItem('isAdmin');
+
+    return flag === 'true';
+  }
+
   get metabaseAdminUrl(): string {
     return `${this.metabaseUrl}/admin/`;
   }
