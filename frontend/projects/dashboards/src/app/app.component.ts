@@ -9,7 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TuiTabs } from '@taiga-ui/kit';
-import { AppService, Dashboard } from './app.service';
+import { AppService, Dashboard, MetabaseAuth } from './app.service';
 
 declare const METABASE_URL: string;
 declare const METABASE_USER: string;
@@ -24,18 +24,18 @@ declare const METABASE_PASS: string;
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit {
-  @Input('metabase-url') metabaseUrl: string = '';
+  @Input('metabase-url') public metabaseUrl: string = '';
 
   private readonly appService = inject(AppService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  dashboards: Dashboard[] = [];
-  activeIndex = 0;
-  safeUrl?: SafeResourceUrl;
-  isLoading = true;
+  public dashboards: Dashboard[] = [];
+  public activeIndex: number = 0;
+  public safeUrl?: SafeResourceUrl;
+  public isLoading: boolean = true;
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     void this.initialize();
   }
 
@@ -46,18 +46,18 @@ export class AppComponent implements OnInit {
 
   private async initialize(): Promise<void> {
     const rawBaseUrl = this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : '');
-    const baseUrl = this.cleanUrl(rawBaseUrl);
-
-    const auth = {
-      username: (typeof METABASE_USER !== 'undefined' ? METABASE_USER : '').replace(/"/g, ''),
-      password: (typeof METABASE_PASS !== 'undefined' ? METABASE_PASS : '').replace(/"/g, '')
-    };
+    const baseUrl = this.appService.cleanUrl(rawBaseUrl);
 
     if (!baseUrl) {
-      console.error('Критическая ошибка: METABASE_URL не определен в окружении');
+      console.error('METABASE_URL не определен');
       this.isLoading = false;
       return;
     }
+
+    const auth: MetabaseAuth = {
+      username: (typeof METABASE_USER !== 'undefined' ? METABASE_USER : '').replace(/"/g, ''),
+      password: (typeof METABASE_PASS !== 'undefined' ? METABASE_PASS : '').replace(/"/g, '')
+    };
 
     try {
       this.dashboards = await this.appService.fetchDashboards(baseUrl, auth);
@@ -75,17 +75,12 @@ export class AppComponent implements OnInit {
   private updateIframe(): void {
     const active = this.dashboards[this.activeIndex];
     const rawBaseUrl = this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : '');
-    const baseUrl = this.cleanUrl(rawBaseUrl);
+    const baseUrl = this.appService.cleanUrl(rawBaseUrl);
 
     if (active?.mftid && baseUrl) {
       const url = `${baseUrl}/public/dashboard/${active.mftid}`;
       this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
       this.cdr.detectChanges();
     }
-  }
-
-  private cleanUrl(url: any): string {
-    if (!url) return '';
-    return String(url).replace(/"/g, '').replace(/\/$/, '');
   }
 }

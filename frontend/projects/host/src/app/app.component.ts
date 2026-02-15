@@ -1,6 +1,7 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TuiRoot, TuiButton } from '@taiga-ui/core';
+import { AppService } from './app.service';
 
 @Component({
   selector: 'app-root',
@@ -12,30 +13,33 @@ import { TuiRoot, TuiButton } from '@taiga-ui/core';
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit {
-  metabaseUrl = String(process.env['METABASE_URL'] || '').replace(/"/g, '').replace(/\/$/, '');
-  mftUrl = String(process.env['MFT_URL'] || '').replace(/"/g, '').replace(/\/$/, '');
+  private readonly appService = inject(AppService);
 
-  get isAdmin(): boolean {
-    const flag = localStorage.getItem('isAdmin');
-
-    return flag === 'true';
+  public get isAdmin(): boolean {
+    return this.appService.isAdmin;
   }
 
-  get metabaseAdminUrl(): string {
-    return `${this.metabaseUrl}/admin/`;
+  public get adminUrl(): string {
+    return this.appService.metabaseAdminUrl;
   }
 
-  ngOnInit() {
-    if (this.mftUrl) {
-      this.loadRemoteMft();
+  public get metabaseUrl(): string {
+    return this.appService.metabaseUrl;
+  }
+
+  public ngOnInit(): void {
+    const url = this.appService.mftUrl;
+
+    if (url) {
+      this.loadRemoteMft(url);
     } else {
       console.error('MFT_URL не определен в окружении');
     }
   }
 
-  private loadRemoteMft() {
+  private loadRemoteMft(url: string): void {
     const script = document.createElement('script');
-    script.src = `${this.mftUrl}/main.js`;
+    script.src = `${url}/main.js`;
     script.type = 'module';
 
     script.onerror = () => {

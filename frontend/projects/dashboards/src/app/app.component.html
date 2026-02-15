@@ -1,26 +1,29 @@
 <div class="mft-wrapper">
-  <ng-container *ngIf="!isLoading; else loading">
-    <tui-tabs
-      *ngIf="dashboards.length > 0"
-      class="tabs-container"
-      [activeItemIndex]="activeIndex"
-      (activeItemIndexChange)="onTabClick($event)"
-    >
-      <button *ngFor="let dash of dashboards" tuiTab type="button">
-        {{ dash.name }}
-      </button>
-    </tui-tabs>
-
-    <div class="iframe-container" *ngIf="safeUrl">
-      <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
-    </div>
-
-    <div *ngIf="dashboards.length === 0" class="empty-state">
-      Дашборды не найдены.
-    </div>
-  </ng-container>
-
-  <ng-template #loading>
+  @if (isLoading) {
     <div class="loading-state">Загрузка дашбордов...</div>
-  </ng-template>
+  } @else {
+    @if (dashboards.length > 0) {
+      <tui-tabs
+        class="tabs-container"
+        [activeItemIndex]="activeIndex"
+        (activeItemIndexChange)="onTabClick($event)"
+      >
+        @for (dash of dashboards; track dash.mftid) {
+          <button tuiTab type="button">
+            {{ dash.name }}
+          </button>
+        }
+      </tui-tabs>
+
+      @if (safeUrl) {
+        <div class="iframe-container">
+          <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
+        </div>
+      }
+    } @else {
+      <div class="empty-state">
+        Дашборды не найдены.
+      </div>
+    }
+  }
 </div>

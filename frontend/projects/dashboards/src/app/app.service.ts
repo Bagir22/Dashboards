@@ -7,23 +7,34 @@ export interface Dashboard {
   mftid: string;
 }
 
+export interface MetabaseAuth {
+  username?: string;
+  password?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  async fetchDashboards(baseUrl: string, auth: any): Promise<Dashboard[]> {
+  public cleanUrl(url: any): string {
+    if (!url) return '';
+    return String(url).replace(/"/g, '').replace(/\/$/, '');
+  }
+
+  public async fetchDashboards(baseUrl: string, auth: MetabaseAuth): Promise<Dashboard[]> {
     const session: any = await firstValueFrom(
       this.http.post(`${baseUrl}/api/session`, auth)
     );
 
     const headers = new HttpHeaders().set('X-Metabase-Session', session.id);
+
     const list: any = await firstValueFrom(
       this.http.get(`${baseUrl}/api/dashboard`, { headers })
     );
 
-    return list
+    return (list || [])
       .filter((d: any) => d.public_uuid !== null)
       .map((d: any) => ({
         name: d.name,
