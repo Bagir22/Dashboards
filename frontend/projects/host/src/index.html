@@ -2,12 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Дашборды</title>
+  <title>Dashboards MFT</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-  <app-root></app-root>
+  <dashboards-mft></dashboards-mft>
+  
+  <!-- ДИАГНОСТИЧЕСКИЙ СКРИПТ -->
+  <script>
+    (function() {
+      console.log('🚀 Microfrontend начал загрузку');
+      console.log('📊 CSP установлена:', document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content?.substring(0, 100) + '...');
+      
+      // Логирование CSP нарушений
+      document.addEventListener('securitypolicyviolation', function(e) {
+        console.error('❌ CSP Нарушение:', {
+          blockedURI: e.blockedURI,
+          violatedDirective: e.violatedDirective,
+          effectiveDirective: e.effectiveDirective,
+          sourceFile: e.sourceFile,
+          lineNumber: e.lineNumber,
+          columnNumber: e.columnNumber
+        });
+      });
+      
+      // Проверка регистрации Web Component
+      setTimeout(function() {
+        console.log('🔍 Проверка Web Component...');
+        
+        const mftElement = document.querySelector('dashboards-mft');
+        console.log('📌 Элемент в DOM:', mftElement);
+        console.log('🔧 Custom Elements доступные:', customElements.get('dashboards-mft') ? '✅ dashboards-mft зарегистрирован' : '❌ dashboards-mft не зарегистрирован');
+        
+        // Проверяем iframe внутри
+        if (mftElement && mftElement.shadowRoot) {
+          console.log('🎭 Shadow Root:', mftElement.shadowRoot);
+          const iframe = mftElement.shadowRoot.querySelector('iframe');
+          console.log('🖼️ Iframe внутри:', iframe);
+          console.log('🔗 Iframe src:', iframe?.src);
+        }
+      }, 2000);
+      
+      // Проверка доступности Metabase
+      setTimeout(function() {
+        console.log('🌐 Проверка доступности Metabase...');
+        fetch('http://localhost:3000/api/health')
+          .then(response => response.json())
+          .then(data => console.log('✅ Metabase доступен:', data.status))
+          .catch(err => console.error('❌ Metabase недоступен:', err));
+      }, 3000);
+      
+      // Логирование ошибок загрузки скриптов
+      window.addEventListener('error', function(e) {
+        console.error('⚠️ Ошибка загрузки:', {
+          filename: e.filename,
+          message: e.message,
+          lineno: e.lineno,
+          colno: e.colno
+        });
+      }, true);
+      
+      // Проверка загрузки remoteEntry.js (для Module Federation)
+      const scriptObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.addedNodes.length) {
+            mutation.addedNodes.forEach(function(node) {
+              if (node.tagName === 'SCRIPT' && node.src) {
+                console.log('📥 Загружается скрипт:', node.src);
+                node.addEventListener('load', function() {
+                  console.log('✅ Скрипт загружен:', this.src);
+                });
+                node.addEventListener('error', function() {
+                  console.error('❌ Ошибка загрузки скрипта:', this.src);
+                });
+              }
+            });
+          }
+        });
+      });
+      
+      scriptObserver.observe(document.head, { childList: true });
+      
+      console.log('📈 Диагностика инициализирована');
+    })();
+  </script>
 </body>
 </html>

@@ -2,9 +2,10 @@ import 'zone.js';
 import { createApplication } from '@angular/platform-browser';
 import { createCustomElement } from '@angular/elements';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { NG_EVENT_PLUGINS } from '@taiga-ui/event-plugins';
+import { provideEventPlugins } from '@taiga-ui/event-plugins';
 import { AppComponent } from './app/app.component';
 import { provideHttpClient } from '@angular/common/http';
+import { importProvidersFrom } from '@angular/core'; // Добавьте этот импорт
 
 (async () => {
   try {
@@ -12,7 +13,7 @@ import { provideHttpClient } from '@angular/common/http';
       providers: [
         provideAnimations(),
         provideHttpClient(),
-        NG_EVENT_PLUGINS,
+        provideEventPlugins(), // Используем модуль
       ],
     });
 

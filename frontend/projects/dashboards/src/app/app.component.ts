@@ -24,6 +24,9 @@ declare const METABASE_PASS: string;
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit {
+  title(title: any) {
+      throw new Error('Method not implemented.');
+  }
   @Input('metabase-url') metabaseUrl: string = '';
 
   private readonly appService = inject(AppService);

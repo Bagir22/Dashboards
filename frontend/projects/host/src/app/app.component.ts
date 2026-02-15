@@ -12,6 +12,9 @@ import { TuiRoot, TuiButton } from '@taiga-ui/core';
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit {
+  title(title: any) {
+      throw new Error('Method not implemented.');
+  }
   metabaseUrl = String(process.env['METABASE_URL'] || '').replace(/"/g, '').replace(/\/$/, '');
   mftUrl = String(process.env['MFT_URL'] || '').replace(/"/g, '').replace(/\/$/, '');
   

@@ -1,8 +1,7 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./", // ОБЯЗАТЕЛЬНО: точка отсчета для путей
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
@@ -16,7 +15,14 @@
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "ES2022"
+    "module": "ES2022",
+    "lib": ["ES2022", "dom"],
+    "paths": {
+      "@taiga-ui/*": ["node_modules/@taiga-ui/*"],
+      "@ng-web-apis/*": ["node_modules/@ng-web-apis/*"],
+      "@maskito/*": ["node_modules/@maskito/*"],
+      "polymorpheus": ["node_modules/polymorpheus"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
