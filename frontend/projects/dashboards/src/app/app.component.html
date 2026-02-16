@@ -2,28 +2,42 @@
   @if (isLoading) {
     <div class="loading-state">Загрузка дашбордов...</div>
   } @else {
-    @if (dashboards.length > 0) {
-      <tui-tabs
-        class="tabs-container"
-        [activeItemIndex]="activeIndex"
-        (activeItemIndexChange)="onTabClick($event)"
-      >
-        @for (dash of dashboards; track dash.mftid) {
-          <button tuiTab type="button">
-            {{ dash.name }}
-          </button>
-        }
-      </tui-tabs>
-
-      @if (safeUrl) {
-        <div class="iframe-container">
-          <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
+    <div class="mft-header">
+      @if (isAdmin) {
+        <div class="admin-row">
+          <a
+            tuiButton
+            appearance="primary"
+            size="s"
+            target="_blank"
+            [href]="adminUrl"
+          >
+            Панель администрирования
+          </a>
         </div>
       }
-    } @else {
-      <div class="empty-state">
-        Дашборды не найдены.
+
+      @if (dashboards.length > 0) {
+        <tui-tabs
+          class="tabs-container"
+          [activeItemIndex]="activeIndex"
+          (activeItemIndexChange)="onTabClick($event)"
+        >
+          @for (dash of dashboards; track dash.mftid) {
+            <button tuiTab type="button">
+              {{ dash.name }}
+            </button>
+          }
+        </tui-tabs>
+      }
+    </div>
+
+    @if (dashboards.length > 0 && safeUrl) {
+      <div class="iframe-container">
+        <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
       </div>
+    } @else if (!isLoading && dashboards.length === 0) {
+      <div class="empty-state">Дашборды не найдены.</div>
     }
   }
 </div>

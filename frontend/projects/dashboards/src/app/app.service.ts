@@ -18,9 +18,17 @@ export interface MetabaseAuth {
 export class AppService {
   private readonly http = inject(HttpClient);
 
+  public get isAdmin(): boolean {
+    return localStorage.getItem('isAdmin') === 'true';
+  }
+
   public cleanUrl(url: any): string {
     if (!url) return '';
     return String(url).replace(/"/g, '').replace(/\/$/, '');
+  }
+
+  public getAdminUrl(baseUrl: string): string {
+    return `${this.cleanUrl(baseUrl)}/admin/`;
   }
 
   public async fetchDashboards(baseUrl: string, auth: MetabaseAuth): Promise<Dashboard[]> {

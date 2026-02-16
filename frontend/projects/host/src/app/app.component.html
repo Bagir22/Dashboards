@@ -2,24 +2,10 @@
   <div class="host-container">
     <div class="header-row">
       <h1 class="tui-text_h3">Дашборды</h1>
-
-      @if (isAdmin) {
-        <a
-          tuiButton
-          appearance="primary"
-          size="m"
-          class="admin-button"
-          target="_blank"
-          [href]="adminUrl"
-        >
-          Панель администрирования
-        </a>
-      }
     </div>
 
     <div class="remote-slot tui-space_top-6">
-      <dashboards-mft
-        [attr.metabase-url]="metabaseUrl">
+      <dashboards-mft [attr.metabase-url]="metabaseUrl">
       </dashboards-mft>
     </div>
   </div>

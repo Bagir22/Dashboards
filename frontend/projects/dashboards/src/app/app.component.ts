@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { TuiButton } from '@taiga-ui/core';
 import { TuiTabs } from '@taiga-ui/kit';
 import { AppService, Dashboard, MetabaseAuth } from './app.service';
 
@@ -18,7 +19,7 @@ declare const METABASE_PASS: string;
 @Component({
   selector: 'app-dashboards-root',
   standalone: true,
-  imports: [CommonModule, TuiTabs],
+  imports: [CommonModule, TuiTabs, TuiButton],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -70,6 +71,14 @@ export class AppComponent implements OnInit {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  public get isAdmin(): boolean {
+    return this.appService.isAdmin;
+  }
+
+  public get adminUrl(): string {
+    return this.appService.getAdminUrl(this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : ''));
   }
 
   private updateIframe(): void {
