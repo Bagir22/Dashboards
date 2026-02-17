@@ -27,6 +27,18 @@ export class AppService {
     return String(url).replace(/"/g, '').replace(/\/$/, '');
   }
 
+  public getBaseUrl(inputUrl: string, globalVar: any): string {
+    const raw = inputUrl || (typeof globalVar !== 'undefined' ? globalVar : '');
+    return this.cleanUrl(raw);
+  }
+
+  public getAuthCredentials(userVar: any, passVar: any): MetabaseAuth {
+    return {
+      username: (typeof userVar !== 'undefined' ? userVar : '').replace(/"/g, ''),
+      password: (typeof passVar !== 'undefined' ? passVar : '').replace(/"/g, '')
+    };
+  }
+
   public getAdminUrl(baseUrl: string): string {
     return `${this.cleanUrl(baseUrl)}/admin/`;
   }

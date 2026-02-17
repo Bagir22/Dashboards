@@ -8,9 +8,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { TuiButton } from '@taiga-ui/core';
+import { FormsModule } from '@angular/forms';
+import { TuiButton, TuiTextfield } from '@taiga-ui/core';
 import { TuiTabs } from '@taiga-ui/kit';
-import { AppService, Dashboard, MetabaseAuth } from './app.service';
+import { AppService, Dashboard } from './app.service';
 
 declare const METABASE_URL: string;
 declare const METABASE_USER: string;
@@ -19,7 +20,7 @@ declare const METABASE_PASS: string;
 @Component({
   selector: 'app-dashboards-root',
   standalone: true,
-  imports: [CommonModule, TuiTabs, TuiButton],
+  imports: [CommonModule, TuiTabs, TuiButton, FormsModule, TuiTextfield],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -35,19 +36,36 @@ export class AppComponent implements OnInit {
   public activeIndex: number = 0;
   public safeUrl?: SafeResourceUrl;
   public isLoading: boolean = true;
+  public searchQuery: string = '';
 
   public ngOnInit(): void {
     void this.initialize();
   }
 
+  public get filteredDashboards(): Dashboard[] {
+    const query = this.searchQuery.toLowerCase().trim();
+    return query
+      ? this.dashboards.filter(d => d.name.toLowerCase().includes(query))
+      : this.dashboards;
+  }
+
+  public get isAdmin(): boolean {
+    return this.appService.isAdmin;
+  }
+
+  public get adminUrl(): string {
+    const baseUrl = this.appService.getBaseUrl(this.metabaseUrl, METABASE_URL);
+    return this.appService.getAdminUrl(baseUrl);
+  }
+
   public onTabClick(index: number): void {
-    this.activeIndex = index;
+    const selected = this.filteredDashboards[index];
+    this.activeIndex = this.dashboards.findIndex(d => d.mftid === selected.mftid);
     this.updateIframe();
   }
 
   private async initialize(): Promise<void> {
-    const rawBaseUrl = this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : '');
-    const baseUrl = this.appService.cleanUrl(rawBaseUrl);
+    const baseUrl = this.appService.getBaseUrl(this.metabaseUrl, METABASE_URL);
 
     if (!baseUrl) {
       console.error('METABASE_URL не определен');
@@ -55,10 +73,7 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    const auth: MetabaseAuth = {
-      username: (typeof METABASE_USER !== 'undefined' ? METABASE_USER : '').replace(/"/g, ''),
-      password: (typeof METABASE_PASS !== 'undefined' ? METABASE_PASS : '').replace(/"/g, '')
-    };
+    const auth = this.appService.getAuthCredentials(METABASE_USER, METABASE_PASS);
 
     try {
       this.dashboards = await this.appService.fetchDashboards(baseUrl, auth);
@@ -73,18 +88,9 @@ export class AppComponent implements OnInit {
     }
   }
 
-  public get isAdmin(): boolean {
-    return this.appService.isAdmin;
-  }
-
-  public get adminUrl(): string {
-    return this.appService.getAdminUrl(this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : ''));
-  }
-
-  private updateIframe(): void {
+  public updateIframe(): void {
     const active = this.dashboards[this.activeIndex];
-    const rawBaseUrl = this.metabaseUrl || (typeof METABASE_URL !== 'undefined' ? METABASE_URL : '');
-    const baseUrl = this.appService.cleanUrl(rawBaseUrl);
+    const baseUrl = this.appService.getBaseUrl(this.metabaseUrl, METABASE_URL);
 
     if (active?.mftid && baseUrl) {
       const url = `${baseUrl}/public/dashboard/${active.mftid}`;
