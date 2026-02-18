@@ -364,4 +364,4 @@ FodyWeavers.xsd
 
 .idea/
 
-.env
+/.env
