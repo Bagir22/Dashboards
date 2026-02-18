@@ -14,6 +14,7 @@ using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
 using Infrastructure.ETLPipeline.Extract.Utils;
+using Infrastructure.Metabase;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +43,15 @@ namespace Infrastructure
             InitHangfire( services );
 
             services.AddHostedService<Worker>();
+
+            // Регистрация Metabase
+            services.AddHttpClient<IMetabaseService, MetabaseService>()
+                .ConfigureHttpClient(client =>
+                {
+                    client.BaseAddress = new Uri("http://metabase:3000/");
+                });
+
+
 
             return services;
         }
