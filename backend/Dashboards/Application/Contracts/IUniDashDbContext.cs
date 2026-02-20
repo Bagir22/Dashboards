@@ -16,6 +16,7 @@ namespace Application.Contracts
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<AddressState> AddressStates { get; set; }
         public DbSet<Branch> Branches { get; set; }    
+        public DbSet<TrainingLevel> TrainingLevels { get; set; }    
         
         Task<int> SaveChangesAsync( CancellationToken ct = default );
     }

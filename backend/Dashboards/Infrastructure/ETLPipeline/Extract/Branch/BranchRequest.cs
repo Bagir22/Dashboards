@@ -1,6 +1,5 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Infrastructure.ETLPipeline.Extract.Faculty;
 using Infrastructure.ETLPipeline.Extract.Validation;
 
 namespace Infrastructure.ETLPipeline.Extract.Branch

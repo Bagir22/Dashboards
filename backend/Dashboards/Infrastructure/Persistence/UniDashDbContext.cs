@@ -17,8 +17,8 @@ namespace Infrastructure.Persistence
         public DbSet<Benefit> Benefits { get; set; }
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<AddressState> AddressStates { get; set; }
-        
         public DbSet<Branch> Branches{ get; set; }
+        public DbSet<TrainingLevel> TrainingLevels{ get; set; }
 
         protected override void OnConfiguring( DbContextOptionsBuilder optionsBuilder )
         {

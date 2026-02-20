@@ -6,7 +6,7 @@ namespace Infrastructure.ETLPipeline.Extract.Branch
     {
         [JsonPropertyName( "dictFilialExternalId" )]
         public required string BranchExternalId { get; set; }
-        [JsonPropertyName( "filialName" )]
+        [JsonPropertyName( "filialSName" )]
         public required string Name { get; set; }
     }
 }

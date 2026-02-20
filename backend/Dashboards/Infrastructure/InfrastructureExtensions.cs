@@ -14,6 +14,7 @@ using Infrastructure.ETLPipeline.Extract.Organization;
 using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
+using Infrastructure.ETLPipeline.Extract.TrainingLevel;
 using Infrastructure.ETLPipeline.Extract.Utils;
 using Infrastructure.Metabase;
 using Infrastructure.Persistence;
@@ -93,6 +94,7 @@ namespace Infrastructure
             services.AddHttpClient<IBenefitRequest, BenefitRequest>();
             services.AddHttpClient<IOrganizationRequest, OrganizationRequest>();
             services.AddHttpClient<IBranchRequest, BranchRequest>();
+            services.AddHttpClient<ITrainingLevel, TrainingLevelRequest>();
         }
 
         public static IHost MigrateInfrastructure( this IHost host )
