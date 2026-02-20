@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 
 export interface Dashboard {
   name: string;
-  mftid: string;
+  id: string;
 }
 
 export interface MetabaseAuth {
@@ -17,19 +18,24 @@ export interface MetabaseAuth {
 })
 export class AppService {
   private readonly http = inject(HttpClient);
+  private readonly sanitizer = inject(DomSanitizer);
 
   public get isAdmin(): boolean {
     return localStorage.getItem('isAdmin') === 'true';
   }
 
-  public cleanUrl(url: any): string {
-    if (!url) return '';
-    return String(url).replace(/"/g, '').replace(/\/$/, '');
-  }
-
   public getBaseUrl(inputUrl: string, globalVar: any): string {
     const raw = inputUrl || (typeof globalVar !== 'undefined' ? globalVar : '');
-    return this.cleanUrl(raw);
+    return String(raw).replace(/"/g, '').replace(/\/$/, '');
+  }
+
+  public getAdminUrl(baseUrl: string): string {
+    return `${baseUrl}/admin/`;
+  }
+
+  public getSafeDashboardUrl(baseUrl: string, dashboardId: string): SafeResourceUrl {
+    const url = `${baseUrl}/public/dashboard/${dashboardId}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   public getAuthCredentials(userVar: any, passVar: any): MetabaseAuth {
@@ -39,17 +45,11 @@ export class AppService {
     };
   }
 
-  public getAdminUrl(baseUrl: string): string {
-    return `${this.cleanUrl(baseUrl)}/admin/`;
-  }
-
   public async fetchDashboards(baseUrl: string, auth: MetabaseAuth): Promise<Dashboard[]> {
     const session: any = await firstValueFrom(
       this.http.post(`${baseUrl}/api/session`, auth)
     );
-
     const headers = new HttpHeaders().set('X-Metabase-Session', session.id);
-
     const list: any = await firstValueFrom(
       this.http.get(`${baseUrl}/api/dashboard`, { headers })
     );
@@ -58,7 +58,7 @@ export class AppService {
       .filter((d: any) => d.public_uuid !== null)
       .map((d: any) => ({
         name: d.name,
-        mftid: d.public_uuid
+        id: d.public_uuid
       }));
   }
 }
