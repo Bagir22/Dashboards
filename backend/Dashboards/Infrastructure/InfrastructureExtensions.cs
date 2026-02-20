@@ -5,6 +5,7 @@ using Infrastructure.ETLPipeline;
 using Infrastructure.ETLPipeline.ExceptionHandler;
 using Infrastructure.ETLPipeline.Extract.ApiAuth;
 using Infrastructure.ETLPipeline.Extract.Benifit;
+using Infrastructure.ETLPipeline.Extract.Branch;
 using Infrastructure.ETLPipeline.Extract.Citizenship;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
@@ -91,6 +92,7 @@ namespace Infrastructure
             services.AddHttpClient<IEducationStandardRequest, EducationStandardRequest>();
             services.AddHttpClient<IBenefitRequest, BenefitRequest>();
             services.AddHttpClient<IOrganizationRequest, OrganizationRequest>();
+            services.AddHttpClient<IBranchRequest, BranchRequest>();
         }
 
         public static IHost MigrateInfrastructure( this IHost host )

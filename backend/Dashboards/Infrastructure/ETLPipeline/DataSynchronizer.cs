@@ -2,6 +2,7 @@ using Application.Contracts;
 using Domain.Entities;
 using Infrastructure.ETLPipeline.Extract.ApiAuth;
 using Infrastructure.ETLPipeline.Extract.Benifit;
+using Infrastructure.ETLPipeline.Extract.Branch;
 using Infrastructure.ETLPipeline.Extract.Citizenship;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
@@ -30,6 +31,7 @@ namespace Infrastructure.ETLPipeline
         IEducationProgramRequest educationProgramRequest,
         IEducationStandardRequest educationStandardRequest,
         IBenefitRequest benefitRequest,
+        IBranchRequest branchRequest,
         IOrganizationRequest organizationRequest,
         IMemoryCache memoryCache,
         ILogger<DataSynchronizer> logger ): IDataSynchronizer
@@ -44,7 +46,8 @@ namespace Infrastructure.ETLPipeline
             EducationStandards,
             Benefits,
             Organizations,
-            AddressStates
+            AddressStates,
+            Branches,
         }
 
         private readonly Dictionary<string, int> _genders = new() {
@@ -87,6 +90,7 @@ namespace Infrastructure.ETLPipeline
             await SynchronizeEducationStandardsAsync( token );
             await SynchronizeBenefitsAsync( token );
             await SynchronizeOrganizationsAsync( token );
+            await SynchronizeBranchesAsync(token);
         }
 
         private async Task AddStudentsLoopAsync( string token, DateTime date )
@@ -258,6 +262,43 @@ namespace Infrastructure.ETLPipeline
             await dbContext.SaveChangesAsync();
         }
 
+        private async Task SynchronizeBranchesAsync( string token )
+        {
+            var externalBranches = await branchRequest.GetAllBranchesAsync( token );
+            var existingBranches = await dbContext.Branches.ToListAsync();
+
+            var parsedBranches = externalBranches
+                .Select( f => new Branch()
+                {
+                    Id = Guid.Parse( f.BranchExternalId ),
+                    Name = f.Name
+                } ).ToList();
+
+            var existingIds = existingBranches.Select( f => f.Id ).ToHashSet();
+            var externalIds = parsedBranches.Select( f => f.Id ).ToHashSet();
+
+            var newBranches = parsedBranches
+                .Where( f => !existingIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( newBranches.Any() )
+                await dbContext.Branches.AddRangeAsync( newBranches );
+
+            var toDelete = existingBranches
+                .Where( f => !externalIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( toDelete.Any() )
+                dbContext.Branches.RemoveRange( toDelete );
+
+            memoryCache.Remove( CacheKeys.Branches );
+
+            Dictionary<string, Guid> parsed = parsedBranches.ToDictionary( f => f.Name, f => f.Id );
+            memoryCache.Set( CacheKeys.Branches, parsed );
+
+            await dbContext.SaveChangesAsync();
+        }
+        
         private async Task SynchronizeCitizenshipsAsync( string token )
         {
             var externalCitizenships = await citizenshipRequest.GetAllCitizenshipsAsync( token );
