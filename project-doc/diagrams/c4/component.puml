@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4>
+!include <C4/C4_Component>
+
+title Component Diagram for Сервис Дашборды
+top to bottom direction
+
+Container_Boundary(system, "Сервис ETL-pipeline") {
+    Component(worker, "Worker", ".NET Core", "Создает задачу для инициализации или обновления данных")
+    Component(isync, "IDataSynchronizer", "Интерфейс", "Получает данные из внешнего API и сохраняет в БД")
+    Component(sync, "DataSynchronizer", ".NET Core", "Реализация IDataSynchronizer")
+
+    Component(irequest, "IRequest", "Интерфейс", "Запрос к API для получения данных")
+    Component(request, "Request", ".NET Core", "Реализация IRequest")
+
+    Component(response, "Response", ".NET Core", "Данные")
+
+    Rel(worker, isync, "Uses", "")
+    Rel(sync, irequest, "Uses", "")
+    Rel(sync, response, "Uses", "")
+    isync <|.. sync : ""
+    irequest <|.. request : ""
+}
+
+System_Ext(univuz, "Платформа ЮНИВУЗ-3", "Исходные данные для анализа")
+ContainerDb(dicts, "Dictionaries", "PostgreSQL Database Schema", "Хранит данные о справочниках")
+ContainerDb(university, "University", "PostgreSQL Database Schema", "Хранит данные о сущностях вуза (студент, ведомость, приказ)")
+
+Rel(sync, univuz, "", "HTTPS")
+Rel(sync, dicts, "", "EFCore ORM")
+Rel(sync, university, "", "EFCore ORM")
+
+@enduml

@@ -13,7 +13,7 @@ System_Boundary(system, "Сервис Дашборды") {
 
     System_Boundary(core_services, "Сервисы") {
         Container(ai_service, "ИИ-сервис", ".NET Core", "Формирование отчета по дашбордам")
-        Container(pipeline, "Сервис ETL-pipline", ".NET Core", "Извлечение, обработка и сохранение данных в бд")
+        Container(pipeline, "Сервис ETL-pipeline", ".NET Core", "Извлечение, обработка и сохранение данных в бд")
     }
 
     Boundary(db, "Базы данных") {
