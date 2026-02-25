@@ -2,6 +2,7 @@ using Application.Contracts;
 using Domain.Entities;
 using Infrastructure.ETLPipeline.Extract.ApiAuth;
 using Infrastructure.ETLPipeline.Extract.Benifit;
+using Infrastructure.ETLPipeline.Extract.Branch;
 using Infrastructure.ETLPipeline.Extract.Citizenship;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
@@ -10,8 +11,8 @@ using Infrastructure.ETLPipeline.Extract.Organization;
 using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
+using Infrastructure.ETLPipeline.Extract.TrainingLevel;
 using Infrastructure.ETLPipeline.Synchronize.Utils;
-using Infrastructure.Metabase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,8 @@ namespace Infrastructure.ETLPipeline
         IEducationProgramRequest educationProgramRequest,
         IEducationStandardRequest educationStandardRequest,
         IBenefitRequest benefitRequest,
+        IBranchRequest branchRequest,
+        ITrainingLevel trainingLevelRequest,
         IOrganizationRequest organizationRequest,
         IMemoryCache memoryCache,
         ILogger<DataSynchronizer> logger ): IDataSynchronizer
@@ -44,7 +47,9 @@ namespace Infrastructure.ETLPipeline
             EducationStandards,
             Benefits,
             Organizations,
-            AddressStates
+            AddressStates,
+            Branches,
+            TrainingLevels,
         }
 
         private readonly Dictionary<string, int> _genders = new() {
@@ -87,6 +92,8 @@ namespace Infrastructure.ETLPipeline
             await SynchronizeEducationStandardsAsync( token );
             await SynchronizeBenefitsAsync( token );
             await SynchronizeOrganizationsAsync( token );
+            await SynchronizeBranchesAsync( token );
+            await SynchronizeTrainingLevelsAsync( token );
         }
 
         private async Task AddStudentsLoopAsync( string token, DateTime date )
@@ -258,6 +265,80 @@ namespace Infrastructure.ETLPipeline
             await dbContext.SaveChangesAsync();
         }
 
+        private async Task SynchronizeBranchesAsync( string token )
+        {
+            var externalBranches = await branchRequest.GetAllBranchesAsync( token );
+            var existingBranches = await dbContext.Branches.ToListAsync();
+
+            var parsedBranches = externalBranches
+                .Select( f => new Branch()
+                {
+                    Id = Guid.Parse( f.BranchExternalId ),
+                    Name = f.Name
+                } ).ToList();
+
+            var existingIds = existingBranches.Select( f => f.Id ).ToHashSet();
+            var externalIds = parsedBranches.Select( f => f.Id ).ToHashSet();
+
+            var newBranches = parsedBranches
+                .Where( f => !existingIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( newBranches.Any() )
+                await dbContext.Branches.AddRangeAsync( newBranches );
+
+            var toDelete = existingBranches
+                .Where( f => !externalIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( toDelete.Any() )
+                dbContext.Branches.RemoveRange( toDelete );
+
+            memoryCache.Remove( CacheKeys.Branches );
+
+            Dictionary<string, Guid> parsed = parsedBranches.ToDictionary( f => f.Name, f => f.Id );
+            memoryCache.Set( CacheKeys.Branches, parsed );
+
+            await dbContext.SaveChangesAsync();
+        }
+        
+        private async Task SynchronizeTrainingLevelsAsync( string token )
+        {
+            var externalTrainingLevels = await trainingLevelRequest.GetAllTrainingLevelsAsync( token );
+            var existingTrainingLevels = await dbContext.TrainingLevels.ToListAsync();
+
+            var parsedTrainingLevels = externalTrainingLevels
+                .Select( f => new TrainingLevel()
+                {
+                    Id = Guid.Parse( f.TrainingLevelExternalId),
+                    Name = f.Name
+                } ).ToList();
+
+            var existingIds = existingTrainingLevels.Select( f => f.Id ).ToHashSet();
+            var externalIds = parsedTrainingLevels.Select( f => f.Id ).ToHashSet();
+
+            var newTrainingLevels = parsedTrainingLevels
+                .Where( f => !existingIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( newTrainingLevels.Any() )
+                await dbContext.TrainingLevels.AddRangeAsync( newTrainingLevels );
+
+            var toDelete = existingTrainingLevels
+                .Where( f => !externalIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( toDelete.Any() )
+                dbContext.TrainingLevels.RemoveRange( toDelete );
+
+            memoryCache.Remove( CacheKeys.TrainingLevels );
+
+            Dictionary<string, Guid> parsed = parsedTrainingLevels.ToDictionary( f => f.Name, f => f.Id );
+            memoryCache.Set( CacheKeys.TrainingLevels, parsed );
+
+            await dbContext.SaveChangesAsync();
+        }
+        
         private async Task SynchronizeCitizenshipsAsync( string token )
         {
             var externalCitizenships = await citizenshipRequest.GetAllCitizenshipsAsync( token );

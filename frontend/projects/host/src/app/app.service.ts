@@ -12,12 +12,4 @@ export class AppService {
   public readonly mftUrl: string = String(process.env['MFT_URL'] || '')
     .replace(/"/g, '')
     .replace(/\/$/, '');
-
-  public get isAdmin(): boolean {
-    return localStorage.getItem('isAdmin') === 'true';
-  }
-
-  public get metabaseAdminUrl(): string {
-    return `${this.metabaseUrl}/admin/`;
-  }
 }

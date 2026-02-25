@@ -5,6 +5,7 @@ using Infrastructure.ETLPipeline;
 using Infrastructure.ETLPipeline.ExceptionHandler;
 using Infrastructure.ETLPipeline.Extract.ApiAuth;
 using Infrastructure.ETLPipeline.Extract.Benifit;
+using Infrastructure.ETLPipeline.Extract.Branch;
 using Infrastructure.ETLPipeline.Extract.Citizenship;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
@@ -13,6 +14,7 @@ using Infrastructure.ETLPipeline.Extract.Organization;
 using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
+using Infrastructure.ETLPipeline.Extract.TrainingLevel;
 using Infrastructure.ETLPipeline.Extract.Utils;
 using Infrastructure.Metabase;
 using Infrastructure.Persistence;
@@ -91,6 +93,8 @@ namespace Infrastructure
             services.AddHttpClient<IEducationStandardRequest, EducationStandardRequest>();
             services.AddHttpClient<IBenefitRequest, BenefitRequest>();
             services.AddHttpClient<IOrganizationRequest, OrganizationRequest>();
+            services.AddHttpClient<IBranchRequest, BranchRequest>();
+            services.AddHttpClient<ITrainingLevel, TrainingLevelRequest>();
         }
 
         public static IHost MigrateInfrastructure( this IHost host )

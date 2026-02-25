@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(UniDashDbContext))]
-    partial class UniDashDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260220175112_AddBranches")]
+    partial class AddBranches
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -215,9 +218,6 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("StudyFormId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("TrainingLevelId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AcademicStateId");
@@ -244,8 +244,6 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudyFormId");
 
-                    b.HasIndex("TrainingLevelId");
-
                     b.HasIndex("StudentExternalId", "ContingentDate")
                         .IsUnique();
 
@@ -266,22 +264,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StudyForm", "dictionary");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TrainingLevel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TrainingLevel", "dictionary");
                 });
 
             modelBuilder.Entity("Domain.Entities.Student", b =>
@@ -329,10 +311,6 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.StudyForm", "StudyForm")
                         .WithMany("Students")
                         .HasForeignKey("StudyFormId");
-
-                    b.HasOne("Domain.Entities.TrainingLevel", null)
-                        .WithMany("Students")
-                        .HasForeignKey("TrainingLevelId");
 
                     b.Navigation("AcademicState");
 
@@ -399,11 +377,6 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Domain.Entities.StudyForm", b =>
-                {
-                    b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TrainingLevel", b =>
                 {
                     b.Navigation("Students");
                 });
