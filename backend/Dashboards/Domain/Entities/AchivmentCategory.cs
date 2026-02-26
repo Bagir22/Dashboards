@@ -1,9 +1,9 @@
 namespace Domain.Entities
 {
-    public class AcademicState
+    public class AchivmentCategory
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
-        public List<ContingentStudent> Students { get; set; } = new();
+        public List<Achivment> Achivments { get; set; } = new();
     }
 }

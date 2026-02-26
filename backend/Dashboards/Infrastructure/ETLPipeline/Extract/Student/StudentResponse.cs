@@ -32,6 +32,12 @@ namespace Infrastructure.ETLPipeline.Extract.Student
         public string? TargetOrganizationName { get; set; }
         [JsonPropertyName( "studentBudgetName" )]
         public string? StudentBudgetName { get; set; }
+        [JsonPropertyName("fullName")]
+        public required string FullName { get; set; }
+        [JsonPropertyName("yearStart")]
+        public required int YearStart { get; set; }
+        [JsonPropertyName("trainingLevel")]
+        public required string TrainingLevel { get; set; }
     }
 
     public class StudentsResponse

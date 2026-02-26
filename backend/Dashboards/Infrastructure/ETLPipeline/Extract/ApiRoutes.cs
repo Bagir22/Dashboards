@@ -12,6 +12,10 @@ namespace Infrastructure.ETLPipeline.Extract
         public const string EducationStandardUrl = "https://dev-lk-api.univuz.ru/contingent/education/GetAllEducationStandard";
         public const string BenefitUrl = "https://dev-lk-api.univuz.ru/contingent/d/benefit";
         public const string OrganizationUrl = "https://dev-lk-api.univuz.ru/contingent/d/organization";
+        public const string AchivmentsUrl = "https://dev-lk-api.univuz.ru//scholarship/portfolio/achievements";
+        public const string AchivmentCategoryUrl = "https://dev-lk-api.univuz.ru//scholarship/dicts/achievement-categories";
+        public const string OrderUrl = "https://dev-lk-api.univuz.ru/contingent/manualOrders";
+        public const string OrderCategoryUrl = "https://dev-lk-api.univuz.ru/contingent/d/orderscategory/GetAllDictOrdersCategory/true";
         public const string BranchUrl = "https://dev-lk-api.univuz.ru/contingent/d/filial";
         public const string TrainingLevelUrl = "https://dev-lk-api.univuz.ru/contingent/d/traininglevels/GetList";
     }

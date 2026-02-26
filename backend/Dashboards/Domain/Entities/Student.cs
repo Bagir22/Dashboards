@@ -2,11 +2,8 @@ namespace Domain.Entities
 {
     public class Student
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid StudentExternalId { get; set; }
+        public Guid Id { get; set; }
 
-        public Guid AcademicStateId { get; set; }
-        public AcademicState AcademicState { get; set; }
         public Guid? StudyFormId { get; set; }
         public StudyForm? StudyForm { get; set; }
         public Guid CitizenshipId { get; set; }
@@ -21,13 +18,18 @@ namespace Domain.Entities
         public Organization? Organization { get; set; }
         public Guid? BenefitId { get; set; }
         public Benefit? Benefit { get; set; }
-        public Guid? AddressStateId { get; set; }
-        public AddressState? AddressState { get; set; }
+        public Guid? TrainingLevelId { get; set; }
+        public TrainingLevel? TrainingLevel { get; set; }
+        public Guid? BranchId { get; set; }
+        public Branch? Branch { get; set; }
+        public Guid? GroupId { get; set; }
 
-        public int? Course { get; set; }
-        public double? Ball {  get; set; }
         public int Gender { get; set; }
-        public string? Budget { get; set; }
-        public DateTime ContingentDate { get; set; }
+        public string Fio {  get; set; } = null!;
+        public int AdmissionYear { get; set; }
+
+        public List<Achivment> Achivments { get; set; } = new();
+        public List<ContingentStudent> ContingentStudents { get; set; } = new();
+        public List<Order> Orders { get; set; } = new();
     }
 }

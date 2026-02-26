@@ -3,6 +3,8 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.ETLPipeline;
 using Infrastructure.ETLPipeline.ExceptionHandler;
+using Infrastructure.ETLPipeline.Extract.Achivment;
+using Infrastructure.ETLPipeline.Extract.AchivmentCategory;
 using Infrastructure.ETLPipeline.Extract.ApiAuth;
 using Infrastructure.ETLPipeline.Extract.Benifit;
 using Infrastructure.ETLPipeline.Extract.Branch;
@@ -10,6 +12,8 @@ using Infrastructure.ETLPipeline.Extract.Citizenship;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
 using Infrastructure.ETLPipeline.Extract.Faculty;
+using Infrastructure.ETLPipeline.Extract.Order;
+using Infrastructure.ETLPipeline.Extract.OrderCategory;
 using Infrastructure.ETLPipeline.Extract.Organization;
 using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
@@ -93,6 +97,10 @@ namespace Infrastructure
             services.AddHttpClient<IEducationStandardRequest, EducationStandardRequest>();
             services.AddHttpClient<IBenefitRequest, BenefitRequest>();
             services.AddHttpClient<IOrganizationRequest, OrganizationRequest>();
+            services.AddHttpClient<IAchivmentCategoryRequest, AchivmentCategoryRequest>();
+            services.AddHttpClient<IAchivmentRequest, AchivmentRequest>();
+            services.AddHttpClient<IOrderCategoryRequest, OrderCategoryRequest>();
+            services.AddHttpClient<IOrderRequest, OrderRequest>();
             services.AddHttpClient<IBranchRequest, BranchRequest>();
             services.AddHttpClient<ITrainingLevel, TrainingLevelRequest>();
         }
