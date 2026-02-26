@@ -50,15 +50,12 @@
       }
     </div>
 
-<<<<<<< HEAD
     @if (dashboards.length === 0) {
       <div class="empty-state">Дашборды не найдены.</div>
     } @else if (filteredDashboards.length === 0) {
       <div class="empty-state">По вашему запросу ничего не найдено.</div>
     } @else if (safeUrl) {
-=======
     @if (filteredDashboards.length > 0 && safeUrl) {
->>>>>>> 6c5262e587ce680a60155c2f652572bc92976d45
       <div class="iframe-container">
         <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
       </div>
