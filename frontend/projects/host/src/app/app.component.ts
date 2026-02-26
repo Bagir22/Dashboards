@@ -1,6 +1,6 @@
 import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TuiRoot, TuiButton } from '@taiga-ui/core';
+import { TuiRoot } from '@taiga-ui/core';
 import { AppService } from './app.service';
 
 @Component({
@@ -14,14 +14,6 @@ import { AppService } from './app.service';
 })
 export class AppComponent implements OnInit {
   private readonly appService = inject(AppService);
-
-  public get isAdmin(): boolean {
-    return this.appService.isAdmin;
-  }
-
-  public get adminUrl(): string {
-    return this.appService.metabaseAdminUrl;
-  }
 
   public get metabaseUrl(): string {
     return this.appService.metabaseUrl;

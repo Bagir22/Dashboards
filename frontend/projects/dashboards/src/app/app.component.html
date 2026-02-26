@@ -13,7 +13,7 @@
               tuiTextfield
               placeholder="Поиск дашборда..."
               [(ngModel)]="searchQuery"
-              (ngModelChange)="activeIndex = 0; updateIframe()"
+              (ngModelChange)="onSearchChange()"
             />
           </tui-textfield>
         </div>
@@ -36,23 +36,29 @@
       @if (filteredDashboards.length > 0) {
         <tui-tabs
           class="tabs-container"
-          [activeItemIndex]="filteredDashboards.indexOf(dashboards[activeIndex])"
+          [activeItemIndex]="filteredActiveIndex"
           (activeItemIndexChange)="onTabClick($event)"
         >
-          @for (dash of filteredDashboards; track dash.mftid) {
+          @for (dash of filteredDashboards; track dash.id) {
             <button tuiTab type="button">
               {{ dash.name }}
             </button>
           }
         </tui-tabs>
+      } @else {
+        <div class="no-results-error">По вашему запросу ничего не найдено</div>
       }
     </div>
 
+<<<<<<< HEAD
     @if (dashboards.length === 0) {
       <div class="empty-state">Дашборды не найдены.</div>
     } @else if (filteredDashboards.length === 0) {
       <div class="empty-state">По вашему запросу ничего не найдено.</div>
     } @else if (safeUrl) {
+=======
+    @if (filteredDashboards.length > 0 && safeUrl) {
+>>>>>>> 6c5262e587ce680a60155c2f652572bc92976d45
       <div class="iframe-container">
         <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
       </div>

@@ -16,7 +16,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DB_CONNECTION_STRING": "Host=localhost:5432;Database=unidash;Username=postgres;Password=admin123"
+        "DB_CONNECTION_STRING": "Host=localhost:5432;Database=unidash;Username=admin;Password=admin123"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7175;http://localhost:5007"

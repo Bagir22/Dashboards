@@ -11,6 +11,7 @@ using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
 using Infrastructure.ETLPipeline.Synchronize.Utils;
+using Infrastructure.Metabase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ namespace Infrastructure.ETLPipeline
 {
     internal class DataSynchronizer(
         IUniDashDbContext dbContext,
+        IMetabaseService metabaseService,
         IApiAuthRequest apiAuthRequest,
         ICitizenshipRequest citizenshipRequest,
         IFacultyRequest facultyRequest,
@@ -54,6 +56,8 @@ namespace Infrastructure.ETLPipeline
             var token = await apiAuthRequest.GetTokenAsync();
 
             await SynchronizeReferenceDataAsync( token );
+
+            //await SynchronizeFromMetabaseAsync();
 
             var dates = DateUtils.GetMonthlyDatesFrom2023();
 
