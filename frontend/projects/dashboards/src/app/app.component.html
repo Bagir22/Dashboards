@@ -48,12 +48,14 @@
       }
     </div>
 
-    @if (dashboards.length > 0 && safeUrl) {
+    @if (dashboards.length === 0) {
+      <div class="empty-state">Дашборды не найдены.</div>
+    } @else if (filteredDashboards.length === 0) {
+      <div class="empty-state">По вашему запросу ничего не найдено.</div>
+    } @else if (safeUrl) {
       <div class="iframe-container">
         <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
       </div>
-    } @else if (!isLoading && dashboards.length === 0) {
-      <div class="empty-state">Дашборды не найдены.</div>
     }
   }
 </div>

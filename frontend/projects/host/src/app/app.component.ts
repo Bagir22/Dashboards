@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, TuiRoot, TuiButton],
+  imports: [CommonModule, TuiRoot],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
