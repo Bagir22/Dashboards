@@ -11,6 +11,15 @@ namespace Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN 
+                    IF EXISTS (SELECT 1 FROM pg_views WHERE schemaname = 'public' AND viewname = 'studentview') THEN
+                        REVOKE SELECT ON public.studentview FROM metabase;
+                    END IF;
+                END $$;");
+            migrationBuilder.Sql("DROP VIEW IF EXISTS public.studentview");
+            
             migrationBuilder.DropForeignKey(
                 name: "FK_Student_AcademicState_AcademicStateId",
                 schema: "university",
