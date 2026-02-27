@@ -6,6 +6,7 @@ using Infrastructure.ETLPipeline.Extract.ApiAuth;
 using Infrastructure.ETLPipeline.Extract.Benifit;
 using Infrastructure.ETLPipeline.Extract.Branch;
 using Infrastructure.ETLPipeline.Extract.Citizenship;
+using Infrastructure.ETLPipeline.Extract.Discipline;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
 using Infrastructure.ETLPipeline.Extract.Faculty;
@@ -37,6 +38,7 @@ namespace Infrastructure.ETLPipeline
         IBenefitRequest benefitRequest,
         IBranchRequest branchRequest,
         ITrainingLevel trainingLevelRequest,
+        IDiscipline disciplineRequest,
         IOrganizationRequest organizationRequest,
         IAchivmentCategoryRequest achivmentCategoryRequest,
         IAchivmentRequest achivmentRequest,
@@ -60,6 +62,7 @@ namespace Infrastructure.ETLPipeline
             OrderCategories,
             Branches,
             TrainingLevels,
+            Disciplines,
         }
 
         private readonly Dictionary<string, int> _genders = new() {
@@ -104,6 +107,7 @@ namespace Infrastructure.ETLPipeline
             await SynchronizeOrderCategoriesAsync( token );
             await SynchronizeBranchesAsync( token );
             await SynchronizeTrainingLevelsAsync( token );
+            await SynchronizeDisciplinesAsync( token );
         }
 
         private async Task AddStudentsLoopAsync( string token, DateTime date )
@@ -597,6 +601,48 @@ namespace Infrastructure.ETLPipeline
 
             Dictionary<string, Guid> parsed = parsedTrainingLevels.ToDictionary( f => f.Name, f => f.Id );
             memoryCache.Set( CacheKeys.TrainingLevels, parsed );
+
+            await dbContext.SaveChangesAsync();
+        }
+        
+        private async Task SynchronizeDisciplinesAsync( string token )
+        {
+            var externalDisciplines = await disciplineRequest.GetAllDisciplinesAsync( token );
+            var existingDisciplines = await dbContext.Disciplines.AsNoTracking().ToListAsync();
+
+            var parsedDisciplines = externalDisciplines
+                .Select( f => new Discipline()
+                {
+                    Id = Guid.Parse( f.DisciplineId ),
+                    Name = f.Name
+                } )
+                .DistinctBy( d => d.Id )
+                .ToList();
+
+            var existingIds = existingDisciplines.Select( f => f.Id ).ToHashSet();
+            var externalIds = parsedDisciplines.Select( f => f.Id ).ToHashSet();
+
+            var newDisciplines = parsedDisciplines
+                .Where( f => !existingIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( newDisciplines.Any() )
+                await dbContext.Disciplines.AddRangeAsync( newDisciplines );
+
+            var toDelete = existingDisciplines
+                .Where( f => !externalIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( toDelete.Any() )
+                dbContext.Disciplines.RemoveRange( toDelete );
+
+            memoryCache.Remove( CacheKeys.Disciplines );
+
+            Dictionary<string, Guid> parsed = parsedDisciplines
+                .GroupBy(f => f.Name)
+                .ToDictionary(g => g.Key, g => g.First().Id);
+
+            memoryCache.Set( CacheKeys.Disciplines, parsed );
 
             await dbContext.SaveChangesAsync();
         }

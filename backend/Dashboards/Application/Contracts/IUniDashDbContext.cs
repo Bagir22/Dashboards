@@ -22,6 +22,7 @@ namespace Application.Contracts
         public DbSet<OrderCategory> OrderCategories { get; set; }
         public DbSet<Branch> Branches { get; set; }
         public DbSet<TrainingLevel> TrainingLevels { get; set; }
+        public DbSet<Discipline> Disciplines { get; set; }
 
         Task<int> SaveChangesAsync( CancellationToken ct = default );
     }
