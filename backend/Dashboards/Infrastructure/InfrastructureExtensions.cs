@@ -9,6 +9,7 @@ using Infrastructure.ETLPipeline.Extract.ApiAuth;
 using Infrastructure.ETLPipeline.Extract.Benifit;
 using Infrastructure.ETLPipeline.Extract.Branch;
 using Infrastructure.ETLPipeline.Extract.Citizenship;
+using Infrastructure.ETLPipeline.Extract.Discipline;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
 using Infrastructure.ETLPipeline.Extract.Faculty;
@@ -103,6 +104,7 @@ namespace Infrastructure
             services.AddHttpClient<IOrderRequest, OrderRequest>();
             services.AddHttpClient<IBranchRequest, BranchRequest>();
             services.AddHttpClient<ITrainingLevel, TrainingLevelRequest>();
+            services.AddHttpClient<IDiscipline, DisciplineRequest>();
         }
 
         public static IHost MigrateInfrastructure( this IHost host )

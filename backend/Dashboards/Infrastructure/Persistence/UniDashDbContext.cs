@@ -22,8 +22,9 @@ namespace Infrastructure.Persistence
         public DbSet<AchivmentCategory> AchivmentCategories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderCategory> OrderCategories { get; set; }
-        public DbSet<Branch> Branches{ get; set; }
-        public DbSet<TrainingLevel> TrainingLevels{ get; set; }
+        public DbSet<Branch> Branches { get; set; }
+        public DbSet<TrainingLevel> TrainingLevels { get; set; }
+        public DbSet<Discipline> Disciplines { get; set; }
 
         protected override void OnConfiguring( DbContextOptionsBuilder optionsBuilder )
         {
