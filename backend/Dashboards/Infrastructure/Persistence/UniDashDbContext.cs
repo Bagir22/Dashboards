@@ -25,6 +25,7 @@ namespace Infrastructure.Persistence
         public DbSet<Branch> Branches { get; set; }
         public DbSet<TrainingLevel> TrainingLevels { get; set; }
         public DbSet<Discipline> Disciplines { get; set; }
+        public DbSet<Mark> Marks { get; set; }
 
         protected override void OnConfiguring( DbContextOptionsBuilder optionsBuilder )
         {

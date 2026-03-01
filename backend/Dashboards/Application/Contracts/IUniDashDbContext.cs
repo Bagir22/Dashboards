@@ -23,6 +23,7 @@ namespace Application.Contracts
         public DbSet<Branch> Branches { get; set; }
         public DbSet<TrainingLevel> TrainingLevels { get; set; }
         public DbSet<Discipline> Disciplines { get; set; }
+        public DbSet<Mark> Marks { get; set; }
 
         Task<int> SaveChangesAsync( CancellationToken ct = default );
     }

@@ -13,6 +13,7 @@ using Infrastructure.ETLPipeline.Extract.Discipline;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
 using Infrastructure.ETLPipeline.Extract.Faculty;
+using Infrastructure.ETLPipeline.Extract.Mark;
 using Infrastructure.ETLPipeline.Extract.Order;
 using Infrastructure.ETLPipeline.Extract.OrderCategory;
 using Infrastructure.ETLPipeline.Extract.Organization;
@@ -105,6 +106,7 @@ namespace Infrastructure
             services.AddHttpClient<IBranchRequest, BranchRequest>();
             services.AddHttpClient<ITrainingLevel, TrainingLevelRequest>();
             services.AddHttpClient<IDiscipline, DisciplineRequest>();
+            services.AddHttpClient<IMark, MarkRequest>();
         }
 
         public static IHost MigrateInfrastructure( this IHost host )

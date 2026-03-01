@@ -12,22 +12,22 @@ namespace Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"
-                CREATE OR REPLACE VIEW dictionary.""BranchView"" AS
-                SELECT ""Name""
+                CREATE OR REPLACE VIEW dictionary.""Справочник филиалов"" AS
+                SELECT ""Name"" AS ""Название""
                 FROM dictionary.""Branch"";
             ");
 
             migrationBuilder.Sql(@"
                 GRANT USAGE ON SCHEMA dictionary TO metabase;
-                GRANT SELECT ON dictionary.""BranchView"" TO metabase;
+                GRANT SELECT ON dictionary.""Справочник филиалов"" TO metabase;
             ");
         }
-        
+
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("REVOKE SELECT ON dictionary.BranchView FROM metabase;");
-            migrationBuilder.Sql("DROP VIEW IF EXISTS dictionary.BranchView;");
+            migrationBuilder.Sql(@"REVOKE SELECT ON dictionary.""Справочник филиалов"" FROM metabase;");
+            migrationBuilder.Sql(@"DROP VIEW IF EXISTS dictionary.""Справочник филиалов"";");
         }
     }
 }

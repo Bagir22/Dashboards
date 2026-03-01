@@ -10,6 +10,7 @@ using Infrastructure.ETLPipeline.Extract.Discipline;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
 using Infrastructure.ETLPipeline.Extract.Faculty;
+using Infrastructure.ETLPipeline.Extract.Mark;
 using Infrastructure.ETLPipeline.Extract.Order;
 using Infrastructure.ETLPipeline.Extract.OrderCategory;
 using Infrastructure.ETLPipeline.Extract.Organization;
@@ -39,6 +40,7 @@ namespace Infrastructure.ETLPipeline
         IBranchRequest branchRequest,
         ITrainingLevel trainingLevelRequest,
         IDiscipline disciplineRequest,
+        IMark markRequest,
         IOrganizationRequest organizationRequest,
         IAchivmentCategoryRequest achivmentCategoryRequest,
         IAchivmentRequest achivmentRequest,
@@ -63,6 +65,7 @@ namespace Infrastructure.ETLPipeline
             Branches,
             TrainingLevels,
             Disciplines,
+            Mark
         }
 
         private readonly Dictionary<string, int> _genders = new() {
@@ -108,6 +111,7 @@ namespace Infrastructure.ETLPipeline
             await SynchronizeBranchesAsync( token );
             await SynchronizeTrainingLevelsAsync( token );
             await SynchronizeDisciplinesAsync( token );
+            await SynchronizeMarkAsync( token );
         }
 
         private async Task AddStudentsLoopAsync( string token, DateTime date )
@@ -643,6 +647,47 @@ namespace Infrastructure.ETLPipeline
                 .ToDictionary(g => g.Key, g => g.First().Id);
 
             memoryCache.Set( CacheKeys.Disciplines, parsed );
+
+            await dbContext.SaveChangesAsync();
+        }
+        
+        private async Task SynchronizeMarkAsync( string token )
+        {
+            var externalMarks = await markRequest.GetAllMarksAsync( token );
+            var existingMarks = await dbContext.Marks.ToListAsync();
+
+            var parsedMarks = externalMarks
+                .Select( f => new Mark()
+                {
+                    Id = Guid.Parse( f.MarkId ),
+                    Name = f.Name,
+                    Value = f.Value,
+                    IsGoodMark = f.isGoodMark, 
+                } )
+                .ToList();
+
+            var existingIds = existingMarks.Select( f => f.Id ).ToHashSet();
+            var externalIds = parsedMarks.Select( f => f.Id ).ToHashSet();
+
+            var newMarks = parsedMarks
+                .Where( f => !existingIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( newMarks.Any() )
+                await dbContext.Marks.AddRangeAsync( newMarks );
+
+            var toDelete = existingMarks
+                .Where( f => !externalIds.Contains( f.Id ) )
+                .ToList();
+
+            if ( toDelete.Any() )
+                dbContext.Marks.RemoveRange( toDelete );
+
+            memoryCache.Remove( CacheKeys.Mark );
+
+            Dictionary<string, Guid> parsed = parsedMarks.ToDictionary( f => f.Name, f => f.Id );
+
+            memoryCache.Set( CacheKeys.Mark, parsed );
 
             await dbContext.SaveChangesAsync();
         }
