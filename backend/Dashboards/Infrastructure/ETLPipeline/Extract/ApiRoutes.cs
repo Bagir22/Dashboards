@@ -19,5 +19,6 @@ namespace Infrastructure.ETLPipeline.Extract
         public const string BranchUrl = "https://dev-lk-api.univuz.ru/contingent/d/filial";
         public const string TrainingLevelUrl = "https://dev-lk-api.univuz.ru/contingent/d/traininglevels/GetList";
         public const string DisciplinesUrl = "https://dev-lk-api.univuz.ru/session/d/Disciplines";
+        public const string MarksUrl = "https://dev-lk-api.univuz.ru/session/d/Marks";
     }
 }
