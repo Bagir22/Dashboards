@@ -1,3 +1,18 @@
+:root {
+  --tui-font-text: 'Roboto', 'Helvetica Neue', sans-serif;
+  --tui-text-primary: #212121;
+}
+
+body {
+  margin: 0;
+  background-color: #EEE;
+  min-height: 100vh;
+}
+
+tui-root {
+  border-image: initial !important;
+}
+
 .host-container {
   padding: 2rem;
   max-width: 1600px;
@@ -14,7 +29,7 @@
 }
 
 .remote-slot {
-  background: #ffffff;
+  background: #FFF;
   border: 1px solid var(--tui-base-03);
   border-radius: var(--tui-radius-l);
   min-height: 850px;
