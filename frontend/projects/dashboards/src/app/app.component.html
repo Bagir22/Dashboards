@@ -1,26 +1,58 @@
-<div class="mft-wrapper">
-  <ng-container *ngIf="!isLoading; else loading">
-    <tui-tabs
-      *ngIf="dashboards.length > 0"
-      class="tabs-container"
-      [activeItemIndex]="activeIndex"
-      (activeItemIndexChange)="onTabClick($event)"
-    >
-      <button *ngFor="let dash of dashboards" tuiTab type="button">
-        {{ dash.name }}
+<div class="dashboards-container">
+  <!-- Основной контент с дашбордами -->
+  <div class="dashboards-content" [class.with-assistant]="showAiAssistant">
+    <div class="dashboards-header">
+      <h2 class="title">Дашборды</h2>
+      
+      <!-- Кнопка для открытия/закрытия AI-ассистента с иконкой smart_toy -->
+      <button
+        class="ai-toggle-btn"
+        [class.active]="showAiAssistant"
+        (click)="toggleAiAssistant()"
+        [tuiHint]="showAiAssistant ? 'Скрыть помощника' : 'Показать помощника'"
+        tuiHintDirection="left"
+      >
+        <span class="material-icons-outlined">smart_toy</span>
       </button>
-    </tui-tabs>
-
-    <div class="iframe-container" *ngIf="safeUrl">
-      <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
     </div>
 
-    <div *ngIf="dashboards.length === 0" class="empty-state">
-      Дашборды не найдены.
-    </div>
-  </ng-container>
+    <ng-container *ngIf="!isLoading; else loading">
+      <tui-tabs
+        *ngIf="dashboards.length > 0"
+        class="tabs-container"
+        [activeItemIndex]="activeIndex"
+        (activeItemIndexChange)="onTabClick($event)"
+      >
+        <button *ngFor="let dash of dashboards" tuiTab type="button">
+          {{ dash.name }}
+        </button>
+      </tui-tabs>
 
-  <ng-template #loading>
-    <div class="loading-state">Загрузка дашбордов...</div>
-  </ng-template>
+      <div class="iframe-container" *ngIf="safeUrl">
+        <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
+      </div>
+
+      <div *ngIf="dashboards.length === 0" class="empty-state">
+        <div class="empty-icon">📊</div>
+        <div class="empty-text">Дашборды не найдены</div>
+        <div class="empty-hint">Проверьте подключение к Metabase</div>
+      </div>
+    </ng-container>
+
+    <ng-template #loading>
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <div>Загрузка дашбордов...</div>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Боковая панель с AI-ассистентом (появляется по клику) -->
+  <div class="ai-sidebar" *ngIf="showAiAssistant">
+    <app-ai-assistant
+      [currentDashboardName]="getCurrentDashboardName()"
+      [currentDashboardId]="getCurrentDashboardId()"
+      (close)="toggleAiAssistant()">
+    </app-ai-assistant>
+  </div>
 </div>

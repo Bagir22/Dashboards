@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 
 namespace Infrastructure
@@ -45,12 +46,11 @@ namespace Infrastructure
             services.AddHostedService<Worker>();
 
             // Регистрация Metabase
-            services.AddHttpClient<IMetabaseService, MetabaseService>()
-                .ConfigureHttpClient(client =>
-                {
-                    client.BaseAddress = new Uri("http://metabase:3000/");
-                });
-
+            services.AddHttpClient<IMetabaseService, MetabaseService>((sp, client) =>
+            {
+                var settings = sp.GetRequiredService<IOptions<MetabaseSettings>>().Value;
+                client.BaseAddress = new Uri(settings.BaseUrl);
+            });
 
 
             return services;

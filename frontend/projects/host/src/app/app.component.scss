@@ -13,6 +13,12 @@
   gap: 1rem;
 }
 
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .admin-button {
   background-color: #0056b3;
   color: #ffffff;

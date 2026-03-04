@@ -83,7 +83,8 @@ public class MetabaseService: IMetabaseService
 // Настройки
 public class MetabaseSettings
 {
-    public string BaseUrl { get; set; } = "http://localhost:3000/";
+    public string BaseUrl => Environment.GetEnvironmentVariable("METABASE_URL") ?? "http://localhost:3000/";
+
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }

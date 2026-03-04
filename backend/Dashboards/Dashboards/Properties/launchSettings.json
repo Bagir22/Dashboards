@@ -19,7 +19,7 @@
         "DB_CONNECTION_STRING": "Host=localhost:5432;Database=unidash;Username=admin;Password=admin123"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7175;http://localhost:5007"
+      "applicationUrl": "http://localhost:5007"
     },
     "IIS Express": {
       "commandName": "IISExpress",

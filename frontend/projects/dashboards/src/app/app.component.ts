@@ -4,12 +4,15 @@ import {
   OnInit,
   inject,
   ChangeDetectorRef,
-  ViewEncapsulation
+  ViewEncapsulation,
+  HostListener
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TuiTabs } from '@taiga-ui/kit';
+import { TuiButton, TuiHint } from '@taiga-ui/core';
 import { AppService, Dashboard } from './app.service';
+import { AiAssistantComponent } from './ai-assistant/ai-assistant.component';
 
 declare const METABASE_URL: string;
 declare const METABASE_USER: string;
@@ -18,15 +21,12 @@ declare const METABASE_PASS: string;
 @Component({
   selector: 'app-dashboards-root',
   standalone: true,
-  imports: [CommonModule, TuiTabs],
+  imports: [CommonModule, TuiTabs, TuiButton, TuiHint, AiAssistantComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit {
-  title(title: any) {
-      throw new Error('Method not implemented.');
-  }
   @Input('metabase-url') metabaseUrl: string = '';
 
   private readonly appService = inject(AppService);
@@ -37,14 +37,34 @@ export class AppComponent implements OnInit {
   activeIndex = 0;
   safeUrl?: SafeResourceUrl;
   isLoading = true;
+  showAiAssistant = false;
 
   ngOnInit(): void {
     void this.initialize();
   }
 
+  @HostListener('document:keydown.escape')
+  onEscapePress() {
+    if (this.showAiAssistant) {
+      this.toggleAiAssistant();
+    }
+  }
+
   public onTabClick(index: number): void {
     this.activeIndex = index;
     this.updateIframe();
+  }
+
+  toggleAiAssistant() {
+    this.showAiAssistant = !this.showAiAssistant;
+  }
+
+  getCurrentDashboardName(): string {
+    return this.dashboards[this.activeIndex]?.name || '';
+  }
+
+  getCurrentDashboardId(): string | null {
+    return this.dashboards[this.activeIndex]?.mftid || null;
   }
 
   private async initialize(): Promise<void> {

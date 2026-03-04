@@ -1,34 +1,42 @@
 using Application.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebApi.Controllers
+[ApiController]
+[Route("[controller]")]
+public class MetabaseController: ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class MetabaseController(IMetabaseService metabaseService): ControllerBase
+    private readonly IMetabaseService _metabaseService;
+    private readonly IConfiguration _configuration;
+
+    public MetabaseController(
+        IMetabaseService metabaseService,
+        IConfiguration configuration)
     {
-        /// <summary>
-        /// Получает данные конкретной карточки Metabase по её ID
-        /// </summary>
-        /// <param name="cardId">ID карточки (число из URL в Metabase)</param>
-        [HttpGet("card-data/{cardId}")]
-        public async Task<IActionResult> GetCardData(int cardId)
+        _metabaseService = metabaseService;
+        _configuration = configuration;
+    }
+
+    [HttpGet("card-data/{cardId}")]
+    public async Task<IActionResult> GetCardData(int cardId)
+    {
+        try
         {
-            try
-            {
-                // Аторизуемся
-                await metabaseService.AuthenticateAsync("admin@example.com", "Admin123Qwerty");
+            // Читаем из appsettings.json через IConfiguration
+            var user = _configuration["MetabaseSettings:METABASE_USER"];
+            var pass = _configuration["MetabaseSettings:METABASE_PASS"];
 
-                // Запрашиваем данные карточки
-                var jsonResult = await metabaseService.GetCardDataJsonAsync(cardId);
-
-                // Возвращаем результат как чистый JSON
-                return Content(jsonResult, "application/json");
-            }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
             {
-                return BadRequest($"Ошибка при получении данных карточки {cardId}: {ex.Message}");
+                return BadRequest("METABASE_USER or METABASE_PASS not set in appsettings.json");
             }
+
+            await _metabaseService.AuthenticateAsync(user, pass);
+            var jsonResult = await _metabaseService.GetCardDataJsonAsync(cardId);
+            return Content(jsonResult, "application/json");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Ошибка при получении данных карточки {cardId}: {ex.Message}");
         }
     }
 }

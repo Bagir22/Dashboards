@@ -1,3 +1,4 @@
+using Dashboards.Services;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
@@ -8,6 +9,9 @@ namespace WebApi
         public static IServiceCollection AddWebApi( this IServiceCollection services, IConfiguration configuration )
         {
             AddSwagger( services );
+
+            services.AddScoped<IAiAssistantService, AiAssistantService>();
+            services.AddHttpClient();
 
             return services;
         }

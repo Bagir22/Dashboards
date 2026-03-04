@@ -39,16 +39,21 @@ services:
     build:
       context: ./backend/Dashboards
       dockerfile: Dockerfile
+    container_name: backend-app # Добавим для ясности
     ports:
       - "${BACKEND_PORT}:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_HTTPS_PORT: 443
-      DB_CONNECTION_STRING: Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};IncludeErrorDetail=true
+      # Для HTTPS в контейнере - сложная тема, пока оставим HTTP, если нет острой нужды
+      # ASPNETCORE_HTTPS_PORT: 443 
+      DB_CONNECTION_STRING: Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      # Можно передать и другие настройки из .env, если нужно
     platform: linux/amd64
     depends_on:
-      - db
-      - metabase
+      db:
+        condition: service_started
+      metabase:
+        condition: service_started
     restart: unless-stopped
     networks:
       - app-network
