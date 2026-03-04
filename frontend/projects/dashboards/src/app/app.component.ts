@@ -2,9 +2,10 @@ import { Component, Input, OnInit, inject, ChangeDetectorRef, ViewEncapsulation 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeResourceUrl } from '@angular/platform-browser';
-import { TuiButton, TuiTextfield } from '@taiga-ui/core';
+import { TuiRoot, TuiButton, TuiTextfield, TuiDataList, TuiDropdown } from '@taiga-ui/core';
 import { TuiTabs } from '@taiga-ui/kit';
 import { AppService, Dashboard } from './app.service';
+import {TuiActiveZone} from '@taiga-ui/cdk';
 
 declare const METABASE_URL: string;
 declare const METABASE_USER: string;
@@ -13,7 +14,14 @@ declare const METABASE_PASS: string;
 @Component({
   selector: 'app-dashboards-root',
   standalone: true,
-  imports: [CommonModule, TuiTabs, TuiButton, FormsModule, TuiTextfield],
+  imports: [CommonModule,
+    TuiTabs,
+    TuiButton,
+    FormsModule,
+    TuiTextfield,
+    TuiDataList,
+    TuiDropdown,
+    TuiRoot, TuiActiveZone],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -23,18 +31,22 @@ export class AppComponent implements OnInit {
 
   private readonly appService = inject(AppService);
   private readonly cdr = inject(ChangeDetectorRef);
+  public readonly exportFormats = ['csv', 'xlsx', 'json'];
 
   public dashboards: Dashboard[] = [];
   public activeIndex: number = 0;
   public safeUrl?: SafeResourceUrl;
   public isLoading: boolean = true;
   public searchQuery: string = '';
+  public isExportMenuOpen = false;
 
   public ngOnInit(): void {
     void this.initialize();
   }
 
-  public get isAdmin(): boolean { return this.appService.isAdmin; }
+  public get isAdmin(): boolean {
+    return this.appService.isAdmin;
+  }
 
   public get adminUrl(): string {
     return this.appService.getAdminUrl(this.baseUrl);
@@ -76,6 +88,25 @@ export class AppComponent implements OnInit {
     this.updateIframe();
   }
 
+  public onDropdownClick(): void {
+    this.isExportMenuOpen = !this.isExportMenuOpen;
+  }
+
+  public onActiveZone(active: boolean | Event): void {
+    if (typeof active === 'boolean') {
+      this.isExportMenuOpen = active && this.isExportMenuOpen;
+    }
+  }
+
+  public async downloadDashboard(format: string): Promise<void> {
+    this.isExportMenuOpen = false;
+    const active = this.dashboards[this.activeIndex];
+    const auth = this.appService.getAuthCredentials(METABASE_USER, METABASE_PASS);
+    if (active) {
+      await this.appService.downloadDashboardData(this.baseUrl, active.id, format, auth);
+    }
+  }
+
   private get baseUrl(): string {
     return this.appService.getBaseUrl(this.metabaseUrl, METABASE_URL);
   }
@@ -103,7 +134,7 @@ export class AppComponent implements OnInit {
   private updateIframe(): void {
     const active = this.dashboards[this.activeIndex];
     if (active) {
-      this.safeUrl = this.appService.getSafeDashboardUrl(this.baseUrl, active.id);
+      this.safeUrl = this.appService.getSafeDashboardUrl(this.baseUrl, active.public_uuid);
       this.cdr.detectChanges();
     }
   }

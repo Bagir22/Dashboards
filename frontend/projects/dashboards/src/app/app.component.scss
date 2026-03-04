@@ -1,8 +1,20 @@
-@import '@taiga-ui/core/styles/taiga-ui-local';
+:root {
+  --tui-font-text: 'Roboto', 'Helvetica Neue', sans-serif;
+  --tui-text-primary: #212121;
+  --tui-background-accent-1: #0D9DDE;
+  --tui-background-accent-1-hover: #15ACF0;
+  --tui-background-accent-1-pressed: #15ACF0;
+}
 
 :host {
   display: block;
   width: 100%;
+
+  --tui-dropdown-offset: 4px;
+}
+
+:host ::ng-deep tui-dropdown {
+  z-index: 1000 !important;
 }
 
 .mft-header {
@@ -14,24 +26,40 @@
   .top-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     width: 100%;
-    gap: 2rem;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
 
     .search-wrapper {
-      flex: 0 1 350px;
-      height: var(--tui-height-m);
+      flex: 1;
+      max-width: 500px;
 
       tui-textfield {
         width: 100%;
-        height: 100%;
+        height: var(--tui-height-m);
       }
     }
 
-    .admin-link {
-      height: var(--tui-height-m);
-      display: inline-flex;
+    .actions-wrapper {
+      display: flex;
       align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+
+      .admin-link,
+      .download-container button {
+        height: var(--tui-height-m);
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .download-container {
+        --tui-dropdown-min-width: 100%;
+        --tui-dropdown-max-width: 100%;
+        width: auto;
+      }
     }
   }
 
@@ -40,6 +68,20 @@
     border-bottom: 1px solid var(--tui-base-03);
   }
 }
+
+tui-data-list {
+  padding: 0;
+
+  button[tuiOption] {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    border-radius: 0;
+    height: var(--tui-height-m);
+  }
+}
+
 .iframe-container {
   width: 100%;
   border-top: 1px solid var(--tui-base-03);
@@ -54,8 +96,15 @@
   }
 }
 
-.loading-state, .empty-state {
+.loading-state,
+.empty-state {
   padding: 3rem;
   text-align: center;
   color: var(--tui-text-02);
+}
+
+.no-results-error {
+  padding: 1rem;
+  color: var(--tui-support-01);
+  text-align: center;
 }
