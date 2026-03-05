@@ -3,16 +3,28 @@
     @if (isLoading) {
       <div class="loading-state">Загрузка дашбордов...</div>
     } @else {
-    <div class="mft-header">
       <div class="top-row">
         <div class="search-wrapper">
-          <tui-textfield size="m" class="search-input">
+          <tui-textfield>
+            <span class="material-icons-outlined search-icon">search</span>
             <input
               tuiTextfield
               placeholder="Поиск"
               [(ngModel)]="searchQuery"
               (ngModelChange)="onSearchChange()"
             />
+            @if (searchQuery) {
+              <button
+                type="button"
+                class="clear-button"
+                (click)="searchQuery = ''"
+                tuiIconButton
+                size="xs"
+                appearance="flat"
+              >
+                <span class="material-icons-outlined">close</span>
+              </button>
+            }
           </tui-textfield>
         </div>
 
@@ -20,17 +32,16 @@
           @if (safeUrl) {
             <div class="download-container">
               <button
-                tuiButton
+                tuiIconButton
                 type="button"
                 appearance="primary"
                 size="m"
                 [tuiDropdown]="exportMenu"
                 [tuiDropdownManual]="isExportMenuOpen"
-                [tuiDropdownLimitWidth]="'fixed'"
                 (click)="onDropdownClick()"
                 (tuiActiveZoneChange)="onActiveZone($event)"
-              >
-                Экспорт
+                >
+                <span class="material-icons-outlined">file_download</span>
               </button>
 
               <ng-template #exportMenu>
@@ -72,7 +83,6 @@
           }
         </tui-tabs>
       }
-    </div>
 
       @if (dashboards.length === 0) {
         <div class="empty-state">Дашборды не найдены.</div>
@@ -83,6 +93,6 @@
           <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
         </div>
       }
-  }
+    }
   </div>
 </tui-root>

@@ -21,7 +21,8 @@ declare const METABASE_PASS: string;
     TuiTextfield,
     TuiDataList,
     TuiDropdown,
-    TuiRoot, TuiActiveZone],
+    TuiRoot,
+    TuiActiveZone],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   encapsulation: ViewEncapsulation.None
