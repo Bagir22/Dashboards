@@ -54,11 +54,12 @@ export class AppService {
 
     return (list || [])
       .filter((d: any) => d.public_uuid !== null)
-      .map((d: any) => ({
+      /* .map((d: any) => ({
         name: d.name,
         id: d.id,
         public_uuid: d.public_uuid
       }));
+      */
   }
 
   public async downloadDashboardData(baseUrl: string, dashId: number, format: string, auth: MetabaseAuth) {
