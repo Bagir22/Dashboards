@@ -40,5 +40,49 @@ namespace Dashboards.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("analyze-dashboard")]
+        public async Task<ActionResult<AiQueryResponse>> AnalyzeDashboard([FromBody] AnalyzeDashboardRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.DashboardId))
+            {
+                return BadRequest(new AiQueryResponse
+                {
+                    Success = false,
+                    ErrorMessage = "ID дашборда не может быть пустым"
+                });
+            }
+
+            var response = await _aiAssistantService.AnalyzeDashboardAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("analyze-metric")]
+        public async Task<ActionResult<AiQueryResponse>> AnalyzeMetric([FromBody] AnalyzeMetricRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.MetricId))
+            {
+                return BadRequest(new AiQueryResponse
+                {
+                    Success = false,
+                    ErrorMessage = "ID метрики не может быть пустым"
+                });
+            }
+
+            var response = await _aiAssistantService.AnalyzeMetricAsync(request);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

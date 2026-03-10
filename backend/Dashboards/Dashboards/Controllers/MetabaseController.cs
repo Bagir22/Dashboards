@@ -21,7 +21,6 @@ public class MetabaseController: ControllerBase
     {
         try
         {
-            // Читаем из appsettings.json через IConfiguration
             var user = _configuration["MetabaseSettings:METABASE_USER"];
             var pass = _configuration["MetabaseSettings:METABASE_PASS"];
 

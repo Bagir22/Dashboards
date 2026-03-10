@@ -45,7 +45,6 @@ namespace Infrastructure
 
             services.AddHostedService<Worker>();
 
-            // Регистрация Metabase
             services.AddHttpClient<IMetabaseService, MetabaseService>((sp, client) =>
             {
                 var settings = sp.GetRequiredService<IOptions<MetabaseSettings>>().Value;

@@ -24,7 +24,6 @@ public class MetabaseService: IMetabaseService
         }
 
     }
-    //Реализация интерфейса
     public async Task<string> GetCardDataJsonAsync(int cardId)
     {
         return await GetCardDataJsonAsync(cardId, CancellationToken.None);
@@ -43,7 +42,6 @@ public class MetabaseService: IMetabaseService
 
     public async Task<string> GetCardDataJsonAsync(int cardId, CancellationToken cancellationToken)
     {
-        // Проверка сессии
         if (string.IsNullOrEmpty(_sessionId) || DateTime.UtcNow >= _sessionExpiresAt)
         {
             await AuthenticateAsync(_settings.Email, _settings.Password);
@@ -79,8 +77,6 @@ public class MetabaseService: IMetabaseService
         public string? Id { get; set; }
     }
 }
-
-// Настройки
 public class MetabaseSettings
 {
     public string BaseUrl => Environment.GetEnvironmentVariable("METABASE_URL") ?? "http://localhost:3000/";

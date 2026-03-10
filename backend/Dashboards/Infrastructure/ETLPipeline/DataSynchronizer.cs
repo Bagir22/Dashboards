@@ -57,8 +57,6 @@ namespace Infrastructure.ETLPipeline
 
             await SynchronizeReferenceDataAsync(token);
 
-            //await SynchronizeFromMetabaseAsync();
-
             var dates = DateUtils.GetMonthlyDatesFrom2023();
 
             foreach (var date in dates)
