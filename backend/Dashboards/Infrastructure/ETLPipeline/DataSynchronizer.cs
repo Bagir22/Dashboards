@@ -10,6 +10,7 @@ using Infrastructure.ETLPipeline.Extract.Discipline;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
 using Infrastructure.ETLPipeline.Extract.Faculty;
+using Infrastructure.ETLPipeline.Extract.Group;
 using Infrastructure.ETLPipeline.Extract.Mark;
 using Infrastructure.ETLPipeline.Extract.Order;
 using Infrastructure.ETLPipeline.Extract.OrderCategory;
@@ -46,6 +47,7 @@ namespace Infrastructure.ETLPipeline
         IAchivmentRequest achivmentRequest,
         IOrderCategoryRequest orderCategoryRequest,
         IOrderRequest orderRequest,
+        IGroupRequest groupRequest,
         IMemoryCache memoryCache,
         ILogger<DataSynchronizer> logger ): IDataSynchronizer
     {
@@ -65,7 +67,9 @@ namespace Infrastructure.ETLPipeline
             Branches,
             TrainingLevels,
             Disciplines,
-            Mark
+            Mark,
+            Groups,
+            GroupBranch
         }
 
         private readonly Dictionary<string, int> _genders = new() {
@@ -76,14 +80,18 @@ namespace Infrastructure.ETLPipeline
         {
             var token = await apiAuthRequest.GetTokenAsync();
 
-            await SynchronizeReferenceDataAsync( token );
+            Console.WriteLine(token);
+
+            await SynchronizeReferenceDataAsync(token);
 
             var dates = DateUtils.GetMonthlyDatesFrom2023();
 
-            foreach ( var date in dates )
+            foreach (var date in dates)
             {
-                await AddStudentsLoopAsync( token, date );
+                await AddStudentsLoopAsync(token, date);
             }
+
+            await SynchronizeOrdersAsync(token);
         }
 
         public async Task UpdateData()
@@ -112,6 +120,7 @@ namespace Infrastructure.ETLPipeline
             await SynchronizeTrainingLevelsAsync( token );
             await SynchronizeDisciplinesAsync( token );
             await SynchronizeMarkAsync( token );
+            await SynchronizeGroupsAsync( token );
         }
 
         private async Task AddStudentsLoopAsync( string token, DateTime date )
@@ -156,6 +165,8 @@ namespace Infrastructure.ETLPipeline
                 Organizations = GetCachedDictionary( CacheKeys.Organizations ),
                 AddressStates = GetCachedDictionary( CacheKeys.AddressStates ),
                 TrainingLevels = GetCachedDictionary( CacheKeys.TrainingLevels ),
+                Groups = GetCachedDictionary( CacheKeys.Groups ),
+                GroupBranches = memoryCache.Get<Dictionary<Guid, Guid>>(CacheKeys.GroupBranch) ?? new()
             };
 
             await SynchronizeAddressStatesAsync( externalStudents.Items );
@@ -198,6 +209,10 @@ namespace Infrastructure.ETLPipeline
                     BenefitId = cache.Benefits.GetNullableValue(s.Benefit),
                     OrganizationId = cache.Organizations.GetNullableValue(s.TargetOrganizationName),
                     TrainingLevelId = cache.TrainingLevels.GetNullableValue(s.TrainingLevel),
+                    GroupId = Guid.Parse(s.GroupId),
+                    BranchId = cache.GroupBranches.TryGetValue(Guid.Parse(s.GroupId), out var branchId)
+                        ? branchId
+                        : null
                 }).ToList();
             }
 
@@ -224,8 +239,6 @@ namespace Infrastructure.ETLPipeline
                 var allStudentIds = await dbContext.Students
                     .Select(s => s.Id)
                     .ToListAsync();
-
-                await SynchronizeOrdersAndAchivmentsAsync(token, allStudentIds);
 
                 return true;
             }
@@ -274,6 +287,55 @@ namespace Infrastructure.ETLPipeline
                 .ToDictionary( sh => sh.Name, sh => sh.Id );
 
             memoryCache.Set( CacheKeys.AddressStates, parsed );
+        }
+
+        private async Task SynchronizeGroupsAsync(string token)
+        {
+            var externalGroups = await groupRequest.GetAllGroupsAsync(token);
+            var existingGroups = await dbContext.Groups.ToListAsync();
+
+            var parsedGroups = externalGroups
+                .Select(f => new Group
+                {
+                    Id = Guid.Parse(f.Id),
+                    Name = f.Name,
+                    Semesters = f.Semesters.Select(s => new Semester
+                    {
+                        Id = Guid.NewGuid(),
+                        Number = s.Semester,
+                        BeginDate = s.Begin,
+                        EndDate = s.End
+                    }).ToList()
+                }).ToList();
+
+            var existingIds = existingGroups.Select(f => f.Id).ToHashSet();
+            var externalIds = parsedGroups.Select(f => f.Id).ToHashSet();
+
+            var newGroups = parsedGroups
+                .Where(f => !existingIds.Contains(f.Id))
+                .ToList();
+
+            if (newGroups.Any())
+                await dbContext.Groups.AddRangeAsync(newGroups);
+
+            var toDelete = existingGroups
+                .Where(f => !externalIds.Contains(f.Id))
+                .ToList();
+
+            if (toDelete.Any())
+                dbContext.Groups.RemoveRange(toDelete);
+
+            memoryCache.Remove(CacheKeys.AchivmentCategories);
+
+            Dictionary<string, Guid> parsed = new Dictionary<string, Guid>();
+            parsedGroups.ForEach(c => parsed.TryAdd(c.Name, c.Id));
+            memoryCache.Set(CacheKeys.Groups, parsed);
+
+            Dictionary<Guid, Guid> branches = new Dictionary<Guid, Guid>();
+            externalGroups.ForEach(g => branches.TryAdd(Guid.Parse(g.Id), Guid.Parse(g.Branch.Id)));
+            memoryCache.Set(CacheKeys.GroupBranch, branches);
+
+            await dbContext.SaveChangesAsync();
         }
 
         private async Task SynchronizeAchivmentCategoriesAsync(string token)
@@ -350,6 +412,44 @@ namespace Infrastructure.ETLPipeline
             memoryCache.Set(CacheKeys.OrderCategories, parsed);
 
             await dbContext.SaveChangesAsync();
+        }
+
+        private async Task SynchronizeOrdersAsync(string token)
+        {
+            var studentIds = await dbContext.Students
+                .Select(s => s.Id)
+                .ToHashSetAsync();
+
+            if (studentIds.Count == 0)
+                return;
+
+            var orderCategoryCache = GetCachedDictionary(CacheKeys.OrderCategories);
+            var achivmentCategoryCache = GetCachedDictionary(CacheKeys.AchivmentCategories);
+
+            var existingOrders = await dbContext.Orders
+                .Where(o => studentIds.Contains(o.StudentId))
+                .Select(o => o.Id)
+                .ToHashSetAsync();
+
+            var existingAchivments = await dbContext.Achivments
+                .Where(a => studentIds.Contains(a.StudentId))
+                .Select(a => a.Id)
+                .ToHashSetAsync();
+
+            List<Order> newOrders = new();
+            List<Achivment> newAchivments = new();
+
+            foreach (var studentId in studentIds)
+            {
+                await ProcessStudentOrdersAsync(
+                    token,
+                    studentId,
+                    orderCategoryCache,
+                    existingOrders,
+                    newOrders);
+            }
+
+            await SaveNewEntitiesAsync(newOrders, newAchivments);
         }
 
         private async Task SynchronizeOrdersAndAchivmentsAsync(string token, List<Guid> studentIds)

@@ -38,6 +38,8 @@ namespace Infrastructure.ETLPipeline.Extract.Student
         public required int YearStart { get; set; }
         [JsonPropertyName("trainingLevel")]
         public required string TrainingLevel { get; set; }
+        [JsonPropertyName("groupExternalId")]
+        public required string GroupId { get; set; }
     }
 
     public class StudentsResponse

@@ -23,6 +23,7 @@ namespace Domain.Entities
         public Guid? BranchId { get; set; }
         public Branch? Branch { get; set; }
         public Guid? GroupId { get; set; }
+        public Group? Group { get; set; }
 
         public int Gender { get; set; }
         public string Fio {  get; set; } = null!;
