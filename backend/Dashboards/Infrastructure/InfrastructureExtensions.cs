@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Infrastructure.Analysis.Services;
 using Infrastructure.ETLPipeline;
 using Infrastructure.ETLPipeline.ExceptionHandler;
 using Infrastructure.ETLPipeline.Extract.Achivment;
@@ -29,6 +30,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Net.Http.Headers;
 
 
 namespace Infrastructure
@@ -60,9 +62,19 @@ namespace Infrastructure
                     client.BaseAddress = new Uri("http://metabase:3000/");
                 });
 
-
+            AddLLMService(services);
 
             return services;
+        }
+
+        private static void AddLLMService(IServiceCollection services)
+        {
+            services.AddHttpClient<IAIService, AIService>();
+
+            services.ConfigureHttpClientDefaults(conf => conf.ConfigureHttpClient(conf => {
+                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "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");
+                conf.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            }));
         }
 
         private static void InitDB( IServiceCollection services )
