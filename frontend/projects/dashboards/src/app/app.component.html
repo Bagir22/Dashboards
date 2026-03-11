@@ -4,7 +4,7 @@
       <div class="loading-state">Загрузка дашбордов...</div>
     } @else {
       <div class="top-row">
-        <div class="search-wrapper">
+        <div class="search-wrapper" [class.with-assistant]="showAiAssistant">
           <tui-textfield>
             <span class="material-icons-outlined search-icon">search</span>
             <input
@@ -30,6 +30,18 @@
 
         <div class="actions-wrapper">
           @if (safeUrl) {
+            <div class="ai-assistant-container">
+              <button
+                class="ai-toggle-btn"
+                [class.active]="showAiAssistant"
+                (click)="toggleAiAssistant()"
+                [tuiHint]="showAiAssistant ? 'Скрыть помощника' : 'Показать помощника'"
+                tuiHintDirection="left"
+              >
+                <span class="material-icons-outlined">smart_toy</span>
+              </button>
+            </div>
+
             <div class="download-container">
               <button
                 tuiIconButton
@@ -93,6 +105,14 @@
           <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
         </div>
       }
+
+      <div class="ai-sidebar" *ngIf="showAiAssistant">
+        <app-ai-assistant
+          [currentDashboardName]="getCurrentDashboardName()"
+          [currentDashboardId]="getCurrentDashboardId()"
+          (close)="toggleAiAssistant()">
+        </app-ai-assistant>
+      </div>
     }
   </div>
 </tui-root>

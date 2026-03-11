@@ -2,10 +2,11 @@ import { Component, Input, OnInit, inject, ChangeDetectorRef, ViewEncapsulation 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeResourceUrl } from '@angular/platform-browser';
-import { TuiRoot, TuiButton, TuiTextfield, TuiDataList, TuiDropdown } from '@taiga-ui/core';
+import { TuiRoot, TuiButton, TuiTextfield, TuiDataList, TuiDropdown, TuiHint } from '@taiga-ui/core';
 import { TuiTabs } from '@taiga-ui/kit';
 import { AppService, Dashboard } from './app.service';
 import {TuiActiveZone} from '@taiga-ui/cdk';
+import { AiAssistantComponent } from './ai-assistant/ai-assistant.component';
 
 declare const METABASE_URL: string;
 declare const METABASE_USER: string;
@@ -21,6 +22,8 @@ declare const METABASE_PASS: string;
     TuiTextfield,
     TuiDataList,
     TuiDropdown,
+    TuiHint,
+    AiAssistantComponent,
     TuiRoot,
     TuiActiveZone],
   templateUrl: './app.component.html',
@@ -40,6 +43,7 @@ export class AppComponent implements OnInit {
   public isLoading: boolean = true;
   public searchQuery: string = '';
   public isExportMenuOpen = false;
+  public showAiAssistant = false;
 
   public ngOnInit(): void {
     void this.initialize();
@@ -106,6 +110,24 @@ export class AppComponent implements OnInit {
     if (active) {
       await this.appService.downloadDashboardData(this.baseUrl, active.id, format, auth);
     }
+  }
+
+  public onEscapePress() {
+    if (this.showAiAssistant) {
+      this.toggleAiAssistant();
+    }
+  }
+
+  public toggleAiAssistant() {
+    this.showAiAssistant = !this.showAiAssistant;
+  }
+
+   getCurrentDashboardName(): string {
+    return this.dashboards[this.activeIndex]?.name || '';
+  }
+
+  getCurrentDashboardId(): string | null {
+    return this.dashboards[this.activeIndex]?.public_uuid || null;
   }
 
   private get baseUrl(): string {
