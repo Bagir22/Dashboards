@@ -1,37 +1,74 @@
-<div class="mft-wrapper">
-  @if (isLoading) {
-    <div class="loading-state">Загрузка дашбордов...</div>
-  } @else {
-    <div class="mft-header">
+<tui-root>
+  <div class="mft-wrapper">
+    @if (isLoading) {
+      <div class="loading-state">Загрузка дашбордов...</div>
+    } @else {
       <div class="top-row">
         <div class="search-wrapper">
-          <tui-textfield
-            size="m"
-            class="search-input"
-          >
+          <tui-textfield>
+            <span class="material-icons-outlined search-icon">search</span>
             <input
               tuiTextfield
-              placeholder="Поиск дашборда..."
+              placeholder="Поиск"
               [(ngModel)]="searchQuery"
               (ngModelChange)="onSearchChange()"
             />
+            @if (searchQuery) {
+              <button
+                type="button"
+                class="clear-button"
+                (click)="searchQuery = ''"
+                tuiIconButton
+                size="xs"
+                appearance="flat"
+              >
+                <span class="material-icons-outlined">close</span>
+              </button>
+            }
           </tui-textfield>
         </div>
 
-        @if (isAdmin) {
-          <a
-            tuiButton
-            appearance="primary"
-            size="m"
-            target="_blank"
-            [href]="adminUrl"
-            class="admin-link"
-          >
-            Панель администрирования
-          </a>
-        }
-      </div>
+        <div class="actions-wrapper">
+          @if (safeUrl) {
+            <div class="download-container">
+              <button
+                tuiIconButton
+                type="button"
+                appearance="primary"
+                size="m"
+                [tuiDropdown]="exportMenu"
+                [tuiDropdownManual]="isExportMenuOpen"
+                (click)="onDropdownClick()"
+                (tuiActiveZoneChange)="onActiveZone($event)"
+                >
+                <span class="material-icons-outlined">file_download</span>
+              </button>
 
+              <ng-template #exportMenu>
+                <tui-data-list class="export-list">
+                  @for (format of exportFormats; track format) {
+                    <button tuiOption (click)="downloadDashboard(format)">
+                      {{ format.toUpperCase() }}
+                    </button>
+                  }
+                </tui-data-list>
+              </ng-template>
+            </div>
+          }
+
+          @if (isAdmin) {
+            <a
+              tuiButton
+              appearance="primary"
+              size="m"
+              target="_blank"
+              [href]="adminUrl"
+            >
+              Панель администрирования
+            </a>
+          }
+        </div>
+      </div>
 
       @if (filteredDashboards.length > 0) {
         <tui-tabs
@@ -45,19 +82,17 @@
             </button>
           }
         </tui-tabs>
-      } @else {
-        <div class="no-results-error">По вашему запросу ничего не найдено</div>
       }
-    </div>
 
-    @if (dashboards.length === 0) {
-      <div class="empty-state">Дашборды не найдены.</div>
-    } @else if (filteredDashboards.length === 0) {
-      <div class="empty-state">По вашему запросу ничего не найдено.</div>
-    } @else if (safeUrl) {
-      <div class="iframe-container">
-        <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
-      </div>
+      @if (dashboards.length === 0) {
+        <div class="empty-state">Дашборды не найдены.</div>
+      } @else if (filteredDashboards.length === 0) {
+        <div class="empty-state">По вашему запросу ничего не найдено.</div>
+      } @else if (safeUrl) {
+        <div class="iframe-container">
+          <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
+        </div>
+      }
     }
-  }
-</div>
+  </div>
+</tui-root>

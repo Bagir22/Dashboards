@@ -15,19 +15,20 @@ namespace Infrastructure.ETLPipeline
             var dataSynchronizer = scope.ServiceProvider.GetRequiredService<IDataSynchronizer>();
             var backgroundJobClient = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
 
-            //recurringJobManager.AddOrUpdate(
-            //    "add-data-monthly",
-            //    () => dataSynchronizer.UpdateData(),
-            //    "0 0 1 * *",
-            //    new RecurringJobOptions
-            //    {
-            //        TimeZone = TimeZoneInfo.Local,
-            //        MisfireHandling = MisfireHandlingMode.Relaxed
-            //    });
+            recurringJobManager.AddOrUpdate(
+                "add-data-monthly",
+                () => dataSynchronizer.UpdateData(),
+                "0 0 1 * *",
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.Local,
+                    MisfireHandling = MisfireHandlingMode.Relaxed
+                });
 
             logger.LogInformation( "Recurring job 'add-data-monthly' registered with Hourly schedule" );
 
-            backgroundJobClient.Enqueue( () => dataSynchronizer.InitialCreate() );
+            backgroundJobClient.Enqueue(() => dataSynchronizer.InitialCreate());
+            
             logger.LogInformation( "Initial data sync job enqueued" );
         }
 
