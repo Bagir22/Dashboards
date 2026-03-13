@@ -28,6 +28,8 @@ namespace Infrastructure.Persistence
         public DbSet<Mark> Marks { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Semester> Semesters { get; set; }
+        public DbSet<SheetDiscipline> SheetDisciplines { get; set; }
+        public DbSet<Plan> Plans { get; set; }
 
         protected override void OnConfiguring( DbContextOptionsBuilder optionsBuilder )
         {

@@ -32,5 +32,6 @@ namespace Domain.Entities
         public List<Achivment> Achivments { get; set; } = new();
         public List<ContingentStudent> ContingentStudents { get; set; } = new();
         public List<Order> Orders { get; set; } = new();
+        public List<SheetDiscipline> SheetDisciplines { get; set; } = new();
     }
 }
