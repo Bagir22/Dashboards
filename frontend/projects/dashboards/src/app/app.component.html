@@ -4,7 +4,7 @@
       <div class="loading-state">Загрузка дашбордов...</div>
     } @else {
       <div class="top-row">
-        <div class="search-wrapper">
+        <div class="search-wrapper" [class.with-assistant]="showAiAssistant">
           <tui-textfield>
             <span class="material-icons-outlined search-icon">search</span>
             <input
@@ -17,7 +17,7 @@
               <button
                 type="button"
                 class="clear-button"
-                (click)="searchQuery = ''"
+                (click)="clearSearch()"
                 tuiIconButton
                 size="xs"
                 appearance="flat"
@@ -30,6 +30,20 @@
 
         <div class="actions-wrapper">
           @if (safeUrl) {
+            <div class="ai-assistant-container">
+              <button
+                tuiIconButton
+                type="button"
+                appearance="primary"
+                size="m"
+                [class.active]="showAiAssistant"
+                (click)="toggleAiAssistant()"
+                [tuiHint]="showAiAssistant ? 'Скрыть помощника' : 'Показать помощника'"
+              >
+                <span class="material-icons-outlined">smart_toy</span>
+              </button>
+            </div>
+
             <div class="download-container">
               <button
                 tuiIconButton
@@ -70,29 +84,55 @@
         </div>
       </div>
 
-      @if (filteredDashboards.length > 0) {
-        <tui-tabs
-          class="tabs-container"
-          [activeItemIndex]="filteredActiveIndex"
-          (activeItemIndexChange)="onTabClick($event)"
-        >
-          @for (dash of filteredDashboards; track dash.id) {
-            <button tuiTab type="button">
-              {{ dash.name }}
-            </button>
-          }
-        </tui-tabs>
-      }
+      <div class="main-content-layout">
+        <div class="dashboard-section">
+          @if (filteredDashboards.length > 0) {
+            <tui-tabs
+              class="tabs-container"
+              [activeItemIndex]="filteredActiveIndex"
+              (activeItemIndexChange)="onTabClick($event)"
+            >
+              @for (dash of filteredDashboards; track dash.id) {
+                <button tuiTab type="button">
+                  {{ dash.name }}
+                </button>
+              }
+            </tui-tabs>
 
-      @if (dashboards.length === 0) {
-        <div class="empty-state">Дашборды не найдены.</div>
-      } @else if (filteredDashboards.length === 0) {
-        <div class="empty-state">По вашему запросу ничего не найдено.</div>
-      } @else if (safeUrl) {
-        <div class="iframe-container">
-          <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
+            <div class="filters-actions-row">
+              <button
+                tuiButton
+                type="button"
+                appearance="primary"
+                size="m"
+                (click)="resetDashboard()"
+              >
+                Очистить фильтры
+              </button>
+            </div>
+          }
+
+          @if (dashboards.length === 0) {
+            <div class="empty-state">Дашборды не найдены.</div>
+          } @else if (filteredDashboards.length === 0) {
+            <div class="empty-state">По вашему запросу ничего не найдено.</div>
+          } @else if (safeUrl) {
+            <div class="iframe-container">
+              <iframe [src]="safeUrl" class="dashboard-iframe" frameborder="0"></iframe>
+            </div>
+          }
         </div>
-      }
+
+        @if (showAiAssistant) {
+          <div class="ai-sidebar">
+            <app-ai-assistant
+              [currentDashboardName]="getCurrentDashboardName()"
+              [currentDashboardId]="getCurrentDashboardId()"
+              (close)="toggleAiAssistant()">
+            </app-ai-assistant>
+          </div>
+        }
+      </div>
     }
   </div>
 </tui-root>

@@ -6,7 +6,6 @@
   --tui-background-accent-1: #0D9DDE;
   --tui-background-accent-1-hover: #15ACF0;
   --tui-background-accent-1-pressed: #15ACF0;
-
   --header-element-height: 56px;
 }
 
@@ -41,14 +40,13 @@
           transform: translateY(-50%);
           color: var(--tui-text-02);
           font-size: 1.25rem;
-          pointer-events: none;
           z-index: 2;
-          line-height: 1;
         }
 
         [tuiTextfield] {
           padding-left: 2.5rem;
           padding-right: 2.5rem;
+          height: var(--header-element-height) !important;
         }
 
         .clear-button {
@@ -56,27 +54,7 @@
           right: 0.25rem;
           top: 50%;
           transform: translateY(-50%);
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--tui-text-02);
           z-index: 2;
-          padding: 0;
-          border-radius: 0.25rem;
-          width: 1.75rem;
-          height: 1.75rem;
-          background: transparent;
-
-          &:hover {
-            color: var(--tui-text-01);
-            background-color: var(--tui-base-02);
-          }
-
-          .material-icons-outlined {
-            font-size: 1.125rem;
-          }
         }
       }
     }
@@ -86,8 +64,8 @@
       gap: 0.5rem;
       align-items: center;
       height: var(--header-element-height);
-      flex-shrink: 0;
 
+      .ai-assistant-container,
       .download-container {
         display: flex;
         height: var(--header-element-height);
@@ -95,101 +73,146 @@
         button[tuiIconButton] {
           height: var(--header-element-height);
           width: var(--header-element-height);
-          min-height: var(--header-element-height);
-          max-height: var(--header-element-height);
-          display: flex;
-          align-items: center;
-          justify-content: center;
           border-radius: var(--tui-radius-m);
-          padding: 0;
-
-          [tuiWrapper] {
-            padding: 0;
-          }
 
           .material-icons-outlined {
             color: white;
             font-size: 1.5rem;
-            line-height: 1;
+          }
+
+          &.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+
+            &:hover {
+              filter: brightness(1.1);
+              transform: translateY(-1px);
+              box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
+            }
+
+            .material-icons-outlined {
+              color: white !important;
+              transform: scale(1.1);
+            }
           }
         }
       }
 
       a[tuiButton] {
         height: var(--header-element-height);
-        min-height: var(--header-element-height);
-        max-height: var(--header-element-height);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 1rem;
-        font-size: 1.25rem;
         border-radius: var(--tui-radius-m);
-        box-sizing: border-box;
-
-        [tuiWrapper] {
-          padding: 0;
-          line-height: 1;
-        }
+        font-size: 1.125rem;
+        padding: 0 1.5rem;
       }
     }
   }
 
-  .tabs-container {
+  .main-content-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
     width: 100%;
-    border-bottom: 1px solid var(--tui-base-03);
-    margin-bottom: 1rem;
-  }
 
-  .iframe-container {
-    width: 100%;
-    border-top: 1px solid var(--tui-base-03);
-    padding-top: 1rem;
+    .dashboard-section {
+      flex: 1;
+      min-width: 0;
 
-    .dashboard-iframe {
-      width: 100%;
-      height: 850px;
-      border: none;
-      display: block;
+      .tabs-container {
+        width: 100%;
+        border-bottom: 1px solid var(--tui-base-03);
+        margin-bottom: 1rem;
+      }
+
+      .filters-actions-row {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 1rem;
+        width: 100%;
+
+        button[tuiButton] {
+          height: var(--header-element-height);
+          min-height: var(--header-element-height);
+          border-radius: var(--tui-radius-m);
+          font-size: 1.125rem;
+          font-weight: 600;
+          padding: 0 1.5rem;
+
+          background-color: #a7c9da !important;
+          color: white !important;
+          border: none;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: #809aa6 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          }
+
+          &:active {
+            background-color: #79959e !important;
+            transform: translateY(0);
+          }
+
+          .material-icons-outlined {
+            font-size: 1.5rem;
+            font-weight: normal;
+          }
+        }
+      }
+
+      .iframe-container {
+        width: 100%;
+        border-top: 1px solid var(--tui-base-03);
+        padding-top: 1rem;
+
+        .dashboard-iframe {
+          width: 100%;
+          height: 850px;
+          border: none;
+          border-radius: var(--tui-radius-m);
+        }
+      }
+    }
+
+    .ai-sidebar {
+      width: 400px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 1rem;
+      background: var(--tui-base-01);
       border-radius: var(--tui-radius-m);
+      animation: slideIn 0.3s ease-out;
     }
   }
 
   .loading-state,
   .empty-state {
-    padding: 3rem;
+    padding: 5rem 1rem;
     text-align: center;
     color: var(--tui-text-02);
-    font-size: 1.125rem;
-    font-weight: 500;
+    font-size: 1.25rem;
+    font-weight: 600;
+    width: 100%;
+    display: block;
   }
 }
 
 .material-icons-outlined {
   font-family: 'Material Icons Outlined';
-  font-weight: normal;
-  font-style: normal;
   line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
   display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
   vertical-align: middle;
 }
 
-tui-data-list {
-  padding: 0;
+tui-data-list button[tuiOption] {
+  width: 100%;
+  height: var(--tui-height-m);
+  font-size: 1.25rem;
+}
 
-  button[tuiOption] {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    border-radius: 0;
-    height: var(--tui-height-m);
-    font-size: 1.25rem;
-  }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
