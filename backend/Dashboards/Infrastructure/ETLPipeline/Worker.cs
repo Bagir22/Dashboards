@@ -25,10 +25,10 @@ namespace Infrastructure.ETLPipeline
             ////        MisfireHandling = MisfireHandlingMode.Relaxed
             ////    });
 
-            //logger.LogInformation( "Recurring job 'add-data-monthly' registered with Hourly schedule" );
+            //logger.LogInformation("Recurring job 'add-data-monthly' registered with Hourly schedule");
 
-            //backgroundJobClient.Enqueue( () => dataSynchronizer.InitialCreate() );
-            //logger.LogInformation( "Initial data sync job enqueued" );
+            //backgroundJobClient.Enqueue(() => dataSynchronizer.InitialCreate());
+            //logger.LogInformation("Initial data sync job enqueued");
         }
 
         public Task StopAsync( CancellationToken cancellationToken )

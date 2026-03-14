@@ -82,6 +82,7 @@ export class AppComponent implements OnInit {
   }
 
   public onTabClick(index: number): void {
+    console.log(this.getCurrentDashboardId())
     const selected = this.filteredDashboards[index];
     if (!selected) return;
 
@@ -143,6 +144,7 @@ export class AppComponent implements OnInit {
   }
 
   getCurrentDashboardId(): string | null {
+    console.log(this.dashboards[this.activeIndex]?.public_uuid)
     return this.dashboards[this.activeIndex]?.public_uuid || null;
   }
 
