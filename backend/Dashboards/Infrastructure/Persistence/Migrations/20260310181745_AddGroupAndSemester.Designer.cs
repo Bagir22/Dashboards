@@ -3,17 +3,20 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(UniDashDbContext))]
-    partial class UniDashDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310181745_AddGroupAndSemester")]
+    partial class AddGroupAndSemester
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -338,21 +341,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Organization", "dictionary");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Plan", b =>
-                {
-                    b.Property<Guid>("SemesterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("DisciplineId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("SemesterId", "DisciplineId");
-
-                    b.HasIndex("DisciplineId");
-
-                    b.ToTable("Plan", "university");
-                });
-
             modelBuilder.Entity("Domain.Entities.Semester", b =>
                 {
                     b.Property<Guid>("Id")
@@ -376,43 +364,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("GroupId");
 
                     b.ToTable("Semester", "dictionary");
-                });
-
-            modelBuilder.Entity("Domain.Entities.SheetDiscipline", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("DisciplineId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("MarkDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("MarkId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Retake")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("SemesterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DisciplineId");
-
-                    b.HasIndex("MarkId");
-
-                    b.HasIndex("SemesterId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("SheetDiscipline", "university");
                 });
 
             modelBuilder.Entity("Domain.Entities.Student", b =>
@@ -581,25 +532,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Plan", b =>
-                {
-                    b.HasOne("Domain.Entities.Discipline", "Discipline")
-                        .WithMany("Plans")
-                        .HasForeignKey("DisciplineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Semester", "Semester")
-                        .WithMany("Plans")
-                        .HasForeignKey("SemesterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Discipline");
-
-                    b.Navigation("Semester");
-                });
-
             modelBuilder.Entity("Domain.Entities.Semester", b =>
                 {
                     b.HasOne("Domain.Entities.Group", "Group")
@@ -609,39 +541,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("Domain.Entities.SheetDiscipline", b =>
-                {
-                    b.HasOne("Domain.Entities.Discipline", "Discipline")
-                        .WithMany("SheetDisciplines")
-                        .HasForeignKey("DisciplineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Mark", "Mark")
-                        .WithMany("SheetDisciplines")
-                        .HasForeignKey("MarkId");
-
-                    b.HasOne("Domain.Entities.Semester", "Semester")
-                        .WithMany("SheetDisciplines")
-                        .HasForeignKey("SemesterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Student", "Student")
-                        .WithMany("SheetDisciplines")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Discipline");
-
-                    b.Navigation("Mark");
-
-                    b.Navigation("Semester");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Domain.Entities.Student", b =>
@@ -739,13 +638,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Discipline", b =>
-                {
-                    b.Navigation("Plans");
-
-                    b.Navigation("SheetDisciplines");
-                });
-
             modelBuilder.Entity("Domain.Entities.EducationProgram", b =>
                 {
                     b.Navigation("Students");
@@ -768,11 +660,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Mark", b =>
-                {
-                    b.Navigation("SheetDisciplines");
-                });
-
             modelBuilder.Entity("Domain.Entities.OrderCategory", b =>
                 {
                     b.Navigation("Orders");
@@ -783,13 +670,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Semester", b =>
-                {
-                    b.Navigation("Plans");
-
-                    b.Navigation("SheetDisciplines");
-                });
-
             modelBuilder.Entity("Domain.Entities.Student", b =>
                 {
                     b.Navigation("Achivments");
@@ -797,8 +677,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("ContingentStudents");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("SheetDisciplines");
                 });
 
             modelBuilder.Entity("Domain.Entities.StudyForm", b =>

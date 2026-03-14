@@ -56,6 +56,10 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasOne(s => s.TrainingLevel)
                 .WithMany(r => r.Students)
                 .HasForeignKey(s => s.TrainingLevelId);
+
+            builder.HasOne(s => s.Group)
+                .WithMany(g => g.Students)
+                .HasForeignKey(s => s.GroupId);
         }
     }
 }

@@ -13,10 +13,13 @@ using Infrastructure.ETLPipeline.Extract.Discipline;
 using Infrastructure.ETLPipeline.Extract.EducationProgram;
 using Infrastructure.ETLPipeline.Extract.EducationStandard;
 using Infrastructure.ETLPipeline.Extract.Faculty;
+using Infrastructure.ETLPipeline.Extract.Group;
 using Infrastructure.ETLPipeline.Extract.Mark;
 using Infrastructure.ETLPipeline.Extract.Order;
 using Infrastructure.ETLPipeline.Extract.OrderCategory;
 using Infrastructure.ETLPipeline.Extract.Organization;
+using Infrastructure.ETLPipeline.Extract.Plan;
+using Infrastructure.ETLPipeline.Extract.SheetDiscipline;
 using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
@@ -107,6 +110,9 @@ namespace Infrastructure
             services.AddHttpClient<ITrainingLevel, TrainingLevelRequest>();
             services.AddHttpClient<IDiscipline, DisciplineRequest>();
             services.AddHttpClient<IMark, MarkRequest>();
+            services.AddHttpClient<IGroupRequest, GroupRequest>();
+            services.AddHttpClient<IPlanRequest, PlanRequest>();
+            services.AddHttpClient<ISheetDisciplineRequest, SheetDisciplineRequest>();
         }
 
         public static IHost MigrateInfrastructure( this IHost host )

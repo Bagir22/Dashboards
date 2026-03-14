@@ -34,6 +34,7 @@
     "fullName",
     "studentNumber",
     "groupName",
+    "groupExternalId",
     "courseNum",
     "studentBudgetName",
     "dictStudentAcademicStateId",

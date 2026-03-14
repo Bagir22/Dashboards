@@ -23,6 +23,7 @@ namespace Domain.Entities
         public Guid? BranchId { get; set; }
         public Branch? Branch { get; set; }
         public Guid? GroupId { get; set; }
+        public Group? Group { get; set; }
 
         public int Gender { get; set; }
         public string Fio {  get; set; } = null!;
@@ -31,5 +32,6 @@ namespace Domain.Entities
         public List<Achivment> Achivments { get; set; } = new();
         public List<ContingentStudent> ContingentStudents { get; set; } = new();
         public List<Order> Orders { get; set; } = new();
+        public List<SheetDiscipline> SheetDisciplines { get; set; } = new();
     }
 }
