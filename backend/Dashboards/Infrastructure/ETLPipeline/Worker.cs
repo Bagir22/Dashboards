@@ -11,7 +11,7 @@ namespace Infrastructure.ETLPipeline
         {
             using var scope = serviceScopeFactory.CreateScope();
 
-            var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+            var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>(); 
             var dataSynchronizer = scope.ServiceProvider.GetRequiredService<IDataSynchronizer>();
             var backgroundJobClient = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
 
@@ -25,7 +25,7 @@ namespace Infrastructure.ETLPipeline
                     MisfireHandling = MisfireHandlingMode.Relaxed
                 });
 
-            logger.LogInformation( "Recurring job 'add-data-monthly' registered with Hourly schedule" );
+            //logger.LogInformation("Recurring job 'add-data-monthly' registered with Hourly schedule");
 
             backgroundJobClient.Enqueue(() => dataSynchronizer.InitialCreate());
             

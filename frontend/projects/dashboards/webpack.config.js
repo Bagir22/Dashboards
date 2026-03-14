@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const ModuleFederationPlugin = require('webpack').container.ModuleFederationPlugin;
 
-const MFT_URL = process.env['MFT_URL'];
+const MFT_URL = process.env['MFT_URL'] || 'http://localhost:4201';
 const BASE_URL = process.env.BASE_URL || 'localhost';
 const MB_PORT = process.env.METABASE_PORT || '3000';
 
@@ -51,8 +51,8 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       METABASE_URL: JSON.stringify(`http://${BASE_URL}:${MB_PORT}`),
-      METABASE_USER: JSON.stringify(process.env.METABASE_USER || ''),
-      METABASE_PASS: JSON.stringify(process.env.METABASE_PASS || '')
+      METABASE_USER: JSON.stringify(process.env.METABASE_USER || 'admin@example.com'),
+      METABASE_PASS: JSON.stringify(process.env.METABASE_PASS || 'Admin123Qwerty')
     })
   ],
 };

@@ -60,8 +60,7 @@ services:
     ports:
       - "${HOST_PORT}:${HOST_PORT}"
     volumes:
-      - ./frontend:/app 
-      - host_node_modules:/app/node_modules   
+      - ./frontend:/app  
     environment:
       - METABASE_URL=http://${BASE_URL}:${METABASE_PORT}
       - MFT_URL=http://${BASE_URL}:${MFT_DASH_PORT}
@@ -73,9 +72,9 @@ services:
   dashboards-mft:
     build: 
       context: ./frontend
+      dockerfile: Dockerfile
     volumes:
       - ./frontend:/app
-      - mft_node_modules:/app/node_modules 
     ports:
       - "${MFT_DASH_PORT}:${MFT_DASH_PORT}"
     environment:
