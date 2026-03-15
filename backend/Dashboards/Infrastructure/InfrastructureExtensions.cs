@@ -1,7 +1,7 @@
 using Application.Contracts;
 using Hangfire;
 using Hangfire.PostgreSql;
-using Infrastructure.Analysis.Services;
+using Infrastructure.Analysis.Services.AIService;
 using Infrastructure.ETLPipeline;
 using Infrastructure.ETLPipeline.ExceptionHandler;
 using Infrastructure.ETLPipeline.Extract.Achivment;

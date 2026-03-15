@@ -1,7 +1,7 @@
 using Application.Contracts;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
-using System.Threading;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Metabase;
 
@@ -23,11 +23,6 @@ public class MetabaseService: IMetabaseService
             httpClient.BaseAddress = new Uri(_settings.BaseUrl);
         }
 
-    }
-    //Реализация интерфейса
-    public async Task<string> GetCardDataJsonAsync(int cardId)
-    {
-        return await GetCardDataJsonAsync(cardId, CancellationToken.None);
     }
 
     public async Task AuthenticateAsync(string email, string password)
@@ -51,7 +46,8 @@ public class MetabaseService: IMetabaseService
 
         try
         {
-            return await ExecuteCardQueryAsync(cardId, cancellationToken);
+            var cardUuid = await ExecuteCardQueryAsync(cardId, cancellationToken);
+            return await GetCardDataByUuid(cardUuid, cancellationToken);
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
@@ -63,13 +59,26 @@ public class MetabaseService: IMetabaseService
 
     private async Task<string> ExecuteCardQueryAsync(int cardId, CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/card/{cardId}/query/json");
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/card/{cardId}");
         request.Headers.Add("X-Metabase-Session", _sessionId);
 
         request.Content = JsonContent.Create(new object());
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+
+        var cardResponse = await response.Content.ReadFromJsonAsync<CardResponse>(cancellationToken);
+
+        return cardResponse.Id;   
+    }
+
+    public async Task<string> GetCardDataByUuid(string cardId, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/public/card/{cardId}/query");
+        request.Headers.Add("X-Metabase-Session", _sessionId);
+
+        request.Content = JsonContent.Create(new object());
+
+        var response = await _httpClient.SendAsync(request, cancellationToken);
 
         return await response.Content.ReadAsStringAsync(cancellationToken);
     }
@@ -77,6 +86,12 @@ public class MetabaseService: IMetabaseService
     private class MetabaseSessionResponse
     {
         public string? Id { get; set; }
+    }
+
+    private class CardResponse
+    {
+        [JsonPropertyName("public_uuid")]
+        public string Id { get; set; } = null!;
     }
 }
 

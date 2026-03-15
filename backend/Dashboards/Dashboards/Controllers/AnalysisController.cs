@@ -5,18 +5,30 @@ namespace Dashboards.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnalysisController(IAIService service): ControllerBase
+    public class AnalysisController(IAIService service, IMetabaseService metabaseService): ControllerBase
     {
 
         [HttpPost("stream")]
-        public async Task GetStream([FromBody] string userRequest)
+        public async Task GetStream([FromBody] int cardId, CancellationToken cancellationToken)
         {
             Response.Headers.Append("Content-Type", "text/event-stream");
             Response.Headers.Append("Cache-Control", "no-cache");
 
             try
             {
-                await foreach (var chunk in service.GetCompletionAsync(userRequest, HttpContext.RequestAborted))
+                var email = Environment.GetEnvironmentVariable("METABASE_USER");
+                var password = Environment.GetEnvironmentVariable("METABASE_PASS");
+
+                if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+                {
+                    throw new Exception("Metabase credentials are not configured in environment variables.");
+                }
+
+                await metabaseService.AuthenticateAsync(email, password);
+
+                var cardData = await metabaseService.GetCardDataJsonAsync(cardId, cancellationToken);
+                Console.WriteLine(cardData);
+                await foreach (var chunk in service.GetCompletionAsync(cardData, HttpContext.RequestAborted))
                 {
                     await Response.WriteAsync($"data: {chunk}\n\n");
                     await Response.Body.FlushAsync();
