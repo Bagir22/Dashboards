@@ -13,7 +13,7 @@ namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(UniDashDbContext))]
     [Migration("20260316120532_GradePointAverageView")]
-    partial class GradePointAverageView
+    partial class AddGradePointAverageView
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
