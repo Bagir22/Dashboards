@@ -7,17 +7,13 @@
       </span>
     </div>
     <div class="header-right">
-      <!-- Кнопка отмены запроса, показывается только во время загрузки -->
       <button 
-        *ngIf="isLoading" 
-        class="cancel-btn" 
-        (click)="cancelRequest()" 
-        title="Отменить запрос">
-        <span class="cancel-icon">⏹️</span>
-        <span class="cancel-text">Отмена</span>
+        class="clear-history-btn" 
+        (click)="clearHistory()" 
+        *ngIf="messages.length > 1 && !isLoading" 
+        title="Очистить историю">
+        🗑️
       </button>
-      
-      <!-- Обычная кнопка закрытия -->
       <button 
         class="close-btn" 
         (click)="close.emit()" 
@@ -25,41 +21,62 @@
         title="Закрыть">
         ✕
       </button>
-      
-      <!-- Альтернативный вариант: если нужна всегда одна кнопка закрытия, которая также отменяет запрос -->
-      <!-- <button class="close-btn" (click)="isLoading ? cancelRequest() : close.emit()" title="Закрыть">
-        ✕
-      </button> -->
     </div>
   </div>
   
   <div class="messages-container" #messagesContainer>
-    <div *ngFor="let msg of messages" class="message" [class.user-message]="msg.isUser">
-      <div class="message-content-wrapper">
-        <div class="message-content">{{ msg.text }}</div>
-        <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+    <ng-container *ngFor="let msg of messages; let i = index">
+      <div class="date-separator" *ngIf="shouldShowDateSeparator(i)">
+        <span class="date-label">{{ formatMessageDate(msg.timestamp) }}</span>
       </div>
-    </div>
-    
-    <div *ngIf="isLoading && !currentStreamingMessage" class="loading-indicator">
-      <tui-loader size="s" [inheritColor]="false"></tui-loader>
-      <span>Подготовка к анализу...</span>
-    </div>
+      
+      <div class="message" [class.user-message]="msg.isUser" [class.assistant-message]="!msg.isUser">
+        <div class="message-content-wrapper">
+          <div class="message-content markdown-content" [innerHTML]="renderMarkdown(msg.text)"></div>
+          <div class="message-footer">
+            <span class="message-time">{{ msg.timestamp | date:'HH:mm' }}</span>
+            <button 
+              *ngIf="!msg.isUser && !msg.isNotification && msg.text" 
+              class="copy-btn" 
+              (click)="copyToClipboard(msg.text, i)" 
+              [title]="copySuccess === i ? 'Скопировано!' : 'Копировать ответ'"
+              [class.copy-success]="copySuccess === i">
+              {{ copySuccess === i ? '✓' : '📋' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
     
     <div *ngIf="isLoading && currentStreamingMessage" class="streaming-indicator">
-      <span class="typing-indicator">⚡</span>
+      <span class="typing-indicator">Печатает...</span>
     </div>
+    
+    <button 
+      *ngIf="isLoading && currentStreamingMessage" 
+      class="cancel-btn" 
+      (click)="cancelRequest()" 
+      title="Отменить запрос">
+      <span class="cancel-text">Отмена</span>
+    </button>
   </div>
 
-  <div class="actions-grid">
-    <button
-      *ngFor="let action of actions"
-      class="action-btn"
-      [class.primary]="action.primary"
-      [disabled]="isLoading"
-      (click)="executeAction(action)">
-      <span class="action-icon">{{ action.icon }}</span>
-      <span class="action-text">{{ action.text }}</span>
-    </button>
+  <div class="actions-grid" *ngIf="groupedCardsbyTabs">
+    <div *ngFor="let tab of groupedCardsbyTabs">
+      <h3>{{ tab.name }}</h3>
+      <button
+        class="action-btn"
+        [disabled]="isLoading"
+        (click)="executeTabAction(tab)">
+        <span class="action-text">{{ tab.name }}</span>
+      </button>
+      <button
+        *ngFor="let card of tab.cards"
+        class="action-btn"
+        [disabled]="isLoading"
+        (click)="executeCardAction(card)">
+        <span class="action-text">{{ card.name }}</span>
+      </button>
+    </div>
   </div>
 </div>

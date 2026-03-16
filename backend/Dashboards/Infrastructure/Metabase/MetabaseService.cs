@@ -9,8 +9,6 @@ public class MetabaseService: IMetabaseService
 {
     private readonly HttpClient _httpClient;
     private readonly MetabaseSettings _settings;
-    private readonly SemaphoreSlim _sessionLock = new(1, 1);
-
     private string? _sessionId;
     private DateTime _sessionExpiresAt = DateTime.MinValue;
 
@@ -59,7 +57,7 @@ public class MetabaseService: IMetabaseService
 
     private async Task<string> ExecuteCardQueryAsync(int cardId, CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/card/{cardId}");
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/card/{cardId}");
         request.Headers.Add("X-Metabase-Session", _sessionId);
 
         request.Content = JsonContent.Create(new object());
@@ -67,13 +65,17 @@ public class MetabaseService: IMetabaseService
         var response = await _httpClient.SendAsync(request, cancellationToken);
 
         var cardResponse = await response.Content.ReadFromJsonAsync<CardResponse>(cancellationToken);
+        if (null == cardResponse)
+        {
+            throw new HttpRequestException();
+        }
 
         return cardResponse.Id;   
     }
 
     public async Task<string> GetCardDataByUuid(string cardId, CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/public/card/{cardId}/query");
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/public/card/{cardId}/query");
         request.Headers.Add("X-Metabase-Session", _sessionId);
 
         request.Content = JsonContent.Create(new object());
@@ -95,10 +97,9 @@ public class MetabaseService: IMetabaseService
     }
 }
 
-// Настройки
 public class MetabaseSettings
 {
-    public string BaseUrl { get; set; } = "http://localhost:3000/";
+    public string BaseUrl { get; set; } = "http://metabase:3000/";
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }

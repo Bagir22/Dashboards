@@ -54,11 +54,7 @@ namespace Infrastructure
             InitHangfire( services );
 
             services.AddHostedService<Worker>();
-            services.AddHttpClient<IMetabaseService, MetabaseService>()
-                .ConfigureHttpClient(client =>
-                {
-                    client.BaseAddress = new Uri("http://metabase:3000/");
-                });
+            services.AddHttpClient<IMetabaseService, MetabaseService>();
 
             AddLLMService(services);
 
@@ -70,7 +66,7 @@ namespace Infrastructure
             services.AddHttpClient<IAIService, AIService>();
 
             services.ConfigureHttpClientDefaults(conf => conf.ConfigureHttpClient(conf => {
-                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "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");
+                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "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");
                 conf.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             }));
         }
