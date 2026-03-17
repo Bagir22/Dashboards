@@ -559,27 +559,27 @@ namespace Infrastructure.ETLPipeline
             if (studentIds.Count == 0)
                 return;
 
-            //var orderCategoryCache = GetCachedDictionary(CacheKeys.OrderCategories);
+            var orderCategoryCache = GetCachedDictionary(CacheKeys.OrderCategories);
             var achivmentCategoryCache = GetCachedDictionary(CacheKeys.AchivmentCategories);
 
             foreach (var studentId in studentIds)
             {
-                /*var existingOrders = await dbContext.Orders
+                var existingOrders = await dbContext.Orders
                     .Where(o => studentIds.Contains(o.StudentId))
                     .Select(o => o.Id)
                     .ToHashSetAsync();
-                */
+                
                 var existingAchivments = await dbContext.Achivments
                     .Where(a => studentIds.Contains(a.StudentId))
                     .Select(a => a.Id)
                     .ToHashSetAsync();
 
-                /*await ProcessStudentOrdersAsync(
+                await ProcessStudentOrdersAsync(
                     token,
                     studentId,
                     orderCategoryCache,
                     existingOrders);
-                */
+                
                 await ProcessStudentAchivmentsAsync(
                     token,
                     studentId,
