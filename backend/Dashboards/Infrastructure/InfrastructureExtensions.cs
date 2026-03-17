@@ -68,7 +68,7 @@ namespace Infrastructure
             services.AddHttpClient<IAIService, AIService>();
 
             services.ConfigureHttpClientDefaults(conf => conf.ConfigureHttpClient(conf => {
-                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "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");
+                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "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");
                 conf.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             }));
         }
