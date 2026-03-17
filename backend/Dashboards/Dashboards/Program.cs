@@ -1,4 +1,5 @@
 using Application;
+using DotNetEnv;
 using Hangfire;
 using Infrastructure;
 using Prometheus;
@@ -13,6 +14,9 @@ namespace WebApi
 
 
             var builder = WebApplication.CreateBuilder( args );
+
+            Env.Load("../../../.env");
+            builder.Configuration.AddEnvironmentVariables();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

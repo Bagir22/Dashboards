@@ -3,17 +3,18 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
-namespace Infrastructure.Analysis.Services
+namespace Infrastructure.Analysis.Services.AIService
 {
     public class AIService(HttpClient httpClient): IAIService
     {
         private const string BaseUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-        public async IAsyncEnumerable<string> GetCompletionAsync(string search, [EnumeratorCancellation] CancellationToken ct)
+        public async IAsyncEnumerable<string> GetCompletionAsync(string cardData, [EnumeratorCancellation] CancellationToken ct)
         {
+            var searchRequest = Prompt.GetFromCardData(cardData);
             var request = new ChatRequest
             {
-                Messages = [new Message { Role = "user", Content = search }],
+                Messages = [new Message { Role = "user", Content = searchRequest }],
                 Reasoning = new Reasoning { Enabled = true },
                 Stream = true,
             };

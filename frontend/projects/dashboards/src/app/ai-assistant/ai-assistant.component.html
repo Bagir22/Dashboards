@@ -3,33 +3,94 @@
     <div class="header-left">
       <h3>ИИ-помощник</h3>
       <span class="dashboard-indicator" *ngIf="currentDashboardName" [title]="'Анализ дашборда: ' + currentDashboardName">
+        📊 {{ currentDashboardName }}
       </span>
     </div>
-  </div>
-  
-  <div class="messages-container" #messagesContainer>
-    <div *ngFor="let msg of messages" class="message" [class.user-message]="msg.isUser">
-      <div class="message-content-wrapper">
-        <div class="message-content">{{ msg.text }}</div>
-        <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
-      </div>
-    </div>
-    
-    <div *ngIf="isLoading" class="loading-indicator">
-      <tui-loader size="s" [inheritColor]="false"></tui-loader>
-      <span>Анализирую данные...</span>
+    <div class="header-right">
+      <button
+        class="clear-history-btn"
+        (click)="clearHistory()"
+        *ngIf="messages.length > 1 && !isLoading"
+        title="Очистить историю">
+        🗑️
+      </button>
+      <button
+        class="close-btn"
+        (click)="close.emit()"
+        *ngIf="!isLoading"
+        title="Закрыть">
+        ✕
+      </button>
     </div>
   </div>
 
-  <div class="actions-grid">
+  <div class="messages-container" #messagesContainer>
+    <ng-container *ngFor="let msg of messages; let i = index">
+      <div class="date-separator" *ngIf="shouldShowDateSeparator(i)">
+        <span class="date-label">{{ formatMessageDate(msg.timestamp) }}</span>
+      </div>
+
+      <div class="message" [class.user-message]="msg.isUser" [class.assistant-message]="!msg.isUser">
+        <div class="message-content-wrapper">
+          <div class="message-content markdown-content" [innerHTML]="renderMarkdown(msg.text)"></div>
+          <div class="message-footer">
+            <span class="message-time">{{ msg.timestamp | date:'HH:mm' }}</span>
+            <button
+              *ngIf="!msg.isUser && !msg.isNotification && msg.text"
+              class="copy-btn"
+              (click)="copyToClipboard(msg.text, i)"
+              [title]="copySuccess === i ? 'Скопировано!' : 'Копировать ответ'"
+              [class.copy-success]="copySuccess === i">
+              {{ copySuccess === i ? '✓' : '📋' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <div *ngIf="isLoading && currentStreamingMessage" class="streaming-indicator">
+      <span class="typing-indicator">Печатает...</span>
+    </div>
+
     <button
-      *ngFor="let action of actions"
-      class="action-btn"
-      [class.primary]="action.primary"
-      [disabled]="isLoading"
-      (click)="executeAction(action)">
-      <span class="action-icon">{{ action.icon }}</span>
-      <span class="action-text">{{ action.text }}</span>
+      *ngIf="isLoading && currentStreamingMessage"
+      class="cancel-btn"
+      (click)="cancelRequest()"
+      title="Отменить запрос">
+      <span class="cancel-text">Отмена</span>
     </button>
+  </div>
+
+  <div class="actions-grid" *ngIf="groupedCardsbyTabs">
+    @if (selectedTabIndex !== undefined) {
+      <button
+        class="action-btn"
+        [disabled]="isLoading"
+        (click)="clearChoice()">
+        <span class="action-text">Назад</span>
+      </button>
+      <button
+        class="action-btn"
+        [disabled]="isLoading"
+        (click)="executeAction(groupedCardsbyTabs[selectedTabIndex])">
+        <span class="action-text">{{ groupedCardsbyTabs[selectedTabIndex].name }}</span>
+      </button>
+      <button
+        *ngFor="let card of groupedCardsbyTabs[selectedTabIndex].cards"
+        class="action-btn"
+        [disabled]="isLoading"
+        (click)="executeAction(card)">
+        <span class="action-text">{{ card.name }}</span>
+      </button>
+    } @else {
+      <div *ngFor="let tab of groupedCardsbyTabs; let i = index">
+        <button
+          class="action-btn"
+          [disabled]="isLoading"
+          (click)="executeAction(tab, i)">
+          <span class="action-text">{{ tab.name }}</span>
+        </button>
+      </div>
+    }
   </div>
 </div>
