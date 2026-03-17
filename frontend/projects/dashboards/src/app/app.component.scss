@@ -3,10 +3,11 @@
 :root {
   --tui-font-text: 'Roboto', 'Helvetica Neue', sans-serif;
   --tui-text-primary: #212121;
+  --tui-text-primary-on-accent-2: #393939;
   --tui-background-accent-1: #0D9DDE;
   --tui-background-accent-1-hover: #15ACF0;
   --tui-background-accent-1-pressed: #15ACF0;
-  --header-element-height: 56px;
+  --header-element-height: 44px;
 }
 
 :host {
@@ -25,87 +26,44 @@
     margin-bottom: 1rem;
     height: var(--header-element-height);
 
-    .search-wrapper {
-      flex: 0 1 350px;
-      height: var(--header-element-height);
+    tui-textfield {
+      width: 350px;
+      height: 100%;
 
-      tui-textfield {
-        width: 100%;
-        height: 100%;
+      .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 42%;
+        transform: translateY(-50%);
+        font-size: 1.25rem;
+        z-index: 2;
+      }
 
-        .search-icon {
-          position: absolute;
-          left: 0.75rem;
-          top: 50%;
-          transform: translateY(-50%);
-          color: var(--tui-text-02);
-          font-size: 1.25rem;
-          z-index: 2;
-        }
+      [tuiTextfield] {
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+        height: var(--header-element-height) !important;
+      }
 
-        [tuiTextfield] {
-          padding-left: 2.5rem;
-          padding-right: 2.5rem;
-          height: var(--header-element-height) !important;
-        }
+      .clear-button {
+        position: absolute;
+        right: 0.25rem;
+        top: 42%;
+        transform: translate(-20%, -50%);
+        z-index: 2;
+        color: var(--tui-text-tertiary);
 
-        .clear-button {
-          position: absolute;
-          right: 0.25rem;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 2;
+        &:hover {
+          color: var(--tui-text-secondary);
         }
       }
     }
 
-    .actions-wrapper {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
+    a[tuiButton] {
       height: var(--header-element-height);
-
-      .ai-assistant-container,
-      .download-container {
-        display: flex;
-        height: var(--header-element-height);
-
-        button[tuiIconButton] {
-          height: var(--header-element-height);
-          width: var(--header-element-height);
-          border-radius: var(--tui-radius-m);
-
-          .material-icons-outlined {
-            color: white;
-            font-size: 1.5rem;
-          }
-
-          &.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            border: none !important;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
-
-            &:hover {
-              filter: brightness(1.1);
-              transform: translateY(-1px);
-              box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
-            }
-
-            .material-icons-outlined {
-              color: white !important;
-              transform: scale(1.1);
-            }
-          }
-        }
-      }
-
-      a[tuiButton] {
-        height: var(--header-element-height);
-        border-radius: var(--tui-radius-m);
-        font-size: 1.125rem;
-        padding: 0 1.5rem;
-      }
+      border-radius: var(--tui-radius-m);
+      font-size: 1.125rem;
+      padding: 0 1.5rem;
     }
   }
 
@@ -121,19 +79,55 @@
 
       .tabs-container {
         width: 100%;
-        border-bottom: 1px solid var(--tui-base-03);
         margin-bottom: 1rem;
+        font-weight: bold;
+
+        [tuiTab] {
+          &._active,
+          &:hover {
+            color: var(--tui-text-primary-on-accent-2);
+          }
+        }
       }
 
-      .filters-actions-row {
+      .actions-wrapper {
         display: flex;
-        justify-content: flex-start;
-        margin-bottom: 1rem;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        align-items: center;
         width: 100%;
 
+        .ai-assistant-container,
+        .download-container {
+          display: flex;
+
+          button[tuiIconButton] {
+            width: var(--header-element-height);
+            border-radius: var(--tui-radius-m);
+
+            .material-icons-outlined {
+              color: var(--tui-text-primary-on-accent-1);
+              font-size: 1.5rem;
+            }
+
+            &.active {
+              background: var(--tui-background-accent-1) !important;
+              border: none !important;
+              box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+
+              &:hover {
+                filter: brightness(1.1);
+                box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
+              }
+
+              .material-icons-outlined {
+                color: var(--tui-text-primary-on-accent-1) !important;
+              }
+            }
+          }
+        }
+
         button[tuiButton] {
-          height: var(--header-element-height);
-          min-height: var(--header-element-height);
           border-radius: var(--tui-radius-m);
           font-size: 1.125rem;
           font-weight: 600;
@@ -146,13 +140,11 @@
 
           &:hover {
             background-color: #809aa6 !important;
-            transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           }
 
           &:active {
             background-color: #79959e !important;
-            transform: translateY(0);
           }
 
           .material-icons-outlined {
@@ -164,7 +156,6 @@
 
       .iframe-container {
         width: 100%;
-        border-top: 1px solid var(--tui-base-03);
         padding-top: 1rem;
 
         .dashboard-iframe {
@@ -191,7 +182,7 @@
   .empty-state {
     padding: 5rem 1rem;
     text-align: center;
-    color: var(--tui-text-02);
+    color: var(--tui-text-tertiary);
     font-size: 1.25rem;
     font-weight: 600;
     width: 100%;

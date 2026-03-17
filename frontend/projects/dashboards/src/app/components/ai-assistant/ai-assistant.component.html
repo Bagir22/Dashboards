@@ -1,9 +1,10 @@
 <div class="ai-assistant">
   <div class="ai-header">
     <div class="header-left">
-      <h3>ИИ-помощник</h3>
+      <h3>ИИ-ассистент</h3>
       <span class="dashboard-indicator" *ngIf="currentDashboardName" [title]="'Анализ дашборда: ' + currentDashboardName">
-        📊 {{ currentDashboardName }}
+        <span class="material-icons-outlined">analytics</span>
+        {{ currentDashboardName }}
       </span>
     </div>
     <div class="header-right">
@@ -11,8 +12,9 @@
         class="clear-history-btn"
         (click)="clearHistory()"
         *ngIf="messages.length > 1 && !isLoading"
-        title="Очистить историю">
-        🗑️
+        title="Очистить историю"
+      >
+        <span class="material-icons-outlined">delete_outline</span>
       </button>
       <button
         class="close-btn"
@@ -40,8 +42,13 @@
               class="copy-btn"
               (click)="copyToClipboard(msg.text, i)"
               [title]="copySuccess === i ? 'Скопировано!' : 'Копировать ответ'"
-              [class.copy-success]="copySuccess === i">
-              {{ copySuccess === i ? '✓' : '📋' }}
+              [class.copy-success]="copySuccess === i"
+            >
+              @if (copySuccess === i) {
+                <span class="material-icons-outlined">done</span>
+              } @else {
+                <span class="material-icons-outlined">content_copy</span>
+              }
             </button>
           </div>
         </div>
