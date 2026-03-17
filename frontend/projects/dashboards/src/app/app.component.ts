@@ -144,7 +144,6 @@ export class AppComponent implements OnInit {
   }
 
   getCurrentDashboardId(): string | null {
-    console.log(this.dashboards[this.activeIndex]?.public_uuid)
     return this.dashboards[this.activeIndex]?.public_uuid || null;
   }
 

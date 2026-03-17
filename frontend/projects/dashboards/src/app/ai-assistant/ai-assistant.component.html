@@ -3,25 +3,7 @@
     <div class="header-left">
       <h3>ИИ-помощник</h3>
       <span class="dashboard-indicator" *ngIf="currentDashboardName" [title]="'Анализ дашборда: ' + currentDashboardName">
-        📊 {{ currentDashboardName }}
       </span>
-    </div>
-    <div class="header-right">
-      <button 
-        *ngIf="isLoading" 
-        class="cancel-btn" 
-        (click)="cancelRequest()" 
-        title="Отменить запрос">
-        <span class="cancel-icon">⏹️</span>
-        <span class="cancel-text">Отмена</span>
-      </button>
-      <button 
-        class="close-btn" 
-        (click)="close.emit()" 
-        *ngIf="!isLoading" 
-        title="Закрыть">
-        ✕
-      </button>
     </div>
   </div>
   
@@ -33,13 +15,9 @@
       </div>
     </div>
     
-    <div *ngIf="isLoading && !currentStreamingMessage" class="loading-indicator">
+    <div *ngIf="isLoading" class="loading-indicator">
       <tui-loader size="s" [inheritColor]="false"></tui-loader>
-      <span>Подготовка к анализу...</span>
-    </div>
-    
-    <div *ngIf="isLoading && currentStreamingMessage" class="streaming-indicator">
-      <span class="typing-indicator">⚡</span>
+      <span>Анализирую данные...</span>
     </div>
   </div>
 

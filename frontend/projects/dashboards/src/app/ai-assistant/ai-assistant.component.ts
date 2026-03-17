@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { TuiLoader } from '@taiga-ui/core';
 
 export interface Message {
@@ -39,11 +40,9 @@ export class AiAssistantComponent {
   ];
 
   isLoading = false;
-  currentStreamingMessage = '';
-  private abortController: AbortController | null = null;
 
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/analysis/stream';
+  private apiUrl = 'http://localhost:8080/api/ai-assistant';
 
   async executeAction(action: any): Promise<void> {
     if (this.isLoading || !this.currentDashboardId) return;
@@ -54,116 +53,41 @@ export class AiAssistantComponent {
       timestamp: new Date()
     });
 
-    const assistantMessage: Message = {
-      text: '',
-      isUser: false,
-      timestamp: new Date()
-    };
-    this.messages.push(assistantMessage);
-    
     this.isLoading = true;
-    this.currentStreamingMessage = '';
     this.scrollToBottom();
 
-    this.abortController = new AbortController();
-
     try {
-      const response = await fetch(this.apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(this.getUserRequest(action)),
-        signal: this.abortController.signal
+      const response = await firstValueFrom(
+        this.http.post<any>(`${this.apiUrl}/${action.endpoint}`, {
+          dashboardId: this.currentDashboardId,
+          dashboardName: this.currentDashboardName,
+          actionId: action.id
+        })
+      );
+
+      this.messages.push({
+        text: response.message || response.analysis || 'Анализ выполнен успешно.',
+        isUser: false,
+        timestamp: new Date()
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    } catch (error) {
+      console.error('API Error:', error);
+      
+      let errorMessage = 'Произошла ошибка при анализе данных. Пожалуйста, попробуйте позже.';
+      
+      if (error instanceof Error) {
+        errorMessage = `Ошибка: ${error.message}`;
       }
 
-      if (!response.body) {
-        throw new Error('Response body is null');
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { value, done } = await reader.read();
-        
-        if (done) {
-          break;
-        }
-
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Разбираем буфер на сообщения SSE
-        const messages = buffer.split('\n\n');
-        buffer = messages.pop() || '';
-
-        for (const message of messages) {
-          if (message.startsWith('data: ')) {
-            const content = message.slice(6);
-            
-            if (content === '[DONE]') {
-              continue;
-            } else if (content.startsWith('Error: ')) {
-              throw new Error(content.slice(7));
-            } else {
-              this.currentStreamingMessage += content;
-              
-              const lastMessage = this.messages[this.messages.length - 1];
-              if (!lastMessage.isUser) {
-                lastMessage.text = this.currentStreamingMessage;
-              }
-              
-              this.scrollToBottom();
-            }
-          }
-        }
-      }
-
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        this.messages.push({
-          text: 'Запрос был отменен.',
-          isUser: false,
-          timestamp: new Date()
-        });
-      } else {
-        console.error('Streaming Error:', error);
-        
-        this.messages.pop();
-        
-        let errorMessage = 'Произошла ошибка при анализе данных. Пожалуйста, попробуйте позже.';
-        
-        if (error.message) {
-          errorMessage = `Ошибка: ${error.message}`;
-        }
-
-        this.messages.push({
-          text: errorMessage,
-          isUser: false,
-          timestamp: new Date()
-        });
-      }
+      this.messages.push({
+        text: errorMessage,
+        isUser: false,
+        timestamp: new Date()
+      });
     } finally {
       this.isLoading = false;
-      this.currentStreamingMessage = '';
-      this.abortController = null;
       this.scrollToBottom();
-    }
-  }
-
-  private getUserRequest(action: any): string {
-    return `Проанализируй дашборд "${this.currentDashboardName}" с помощью действия "${action.text}"`;
-  }
-
-  cancelRequest(): void {
-    if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
     }
   }
 
