@@ -139,6 +139,7 @@ export class AiAssistantComponent implements OnChanges, OnInit {
   protected clearHistory(): void {
     if (confirm('Очистить историю сообщений?')) {
       localStorage.removeItem(this.STORAGE_KEY);
+      this.messages = [];
       this.addWelcomeMessage();
       this.scrollToBottom();
     }
