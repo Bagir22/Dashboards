@@ -63,32 +63,38 @@
 
   <div class="actions-grid" *ngIf="groupedCardsbyTabs">
     @if (selectedTabIndex !== undefined) {
-      <button
-        class="action-btn"
-        [disabled]="isLoading"
-        (click)="clearChoice()">
-        <span class="action-text">Назад</span>
-      </button>
+      @if (groupedCardsbyTabs[selectedTabIndex].id) {
+        <button
+          class="action-btn"
+          [disabled]="isLoading"
+          (click)="clearChoice()">
+          <span class="action-text">Назад</span>
+        </button>
+      }
       <button
         class="action-btn"
         [disabled]="isLoading"
         (click)="executeAction(groupedCardsbyTabs[selectedTabIndex])">
-        <span class="action-text">{{ groupedCardsbyTabs[selectedTabIndex].name }}</span>
+        <span class="action-text">
+          {{ groupedCardsbyTabs[selectedTabIndex].name ? 'Вкладка ' + groupedCardsbyTabs[selectedTabIndex].name : 'Дашборд' }}
+        </span>
       </button>
-      <button
-        *ngFor="let card of groupedCardsbyTabs[selectedTabIndex].cards"
-        class="action-btn"
-        [disabled]="isLoading"
-        (click)="executeAction(card)">
-        <span class="action-text">{{ card.name }}</span>
-      </button>
+      @if (groupedCardsbyTabs[selectedTabIndex].cards.length > 1) {
+        <button
+          *ngFor="let card of groupedCardsbyTabs[selectedTabIndex].cards"
+          class="action-btn"
+          [disabled]="isLoading"
+          (click)="executeAction(card)">
+          <span class="action-text"> График {{ card.name }}</span>
+        </button>
+      }
     } @else {
       <div *ngFor="let tab of groupedCardsbyTabs; let i = index">
         <button
           class="action-btn"
           [disabled]="isLoading"
           (click)="executeAction(tab, i)">
-          <span class="action-text">{{ tab.name }}</span>
+          <span class="action-text">Вкладка {{ tab.name }}</span>
         </button>
       </div>
     }

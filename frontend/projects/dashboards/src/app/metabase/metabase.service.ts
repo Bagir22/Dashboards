@@ -1,11 +1,10 @@
 import { Observable, map } from 'rxjs';
-import { 
-    MetabaseDashboard, 
-    TabMap, 
-    TabCard,
-    MetabaseTab,
-    MetabaseAuth,
-    Dashboard
+import {
+  MetabaseDashboard,
+  TabMap,
+  MetabaseTab,
+  MetabaseAuth,
+  Dashboard, TabInfo
 } from './metabase.model';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -14,77 +13,80 @@ import { firstValueFrom } from 'rxjs';
 import JSZip from 'jszip';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class MetabaseService {
-    private readonly http = inject(HttpClient);
-    private readonly sanitizer = inject(DomSanitizer);
+  private readonly http = inject(HttpClient);
+  private readonly sanitizer = inject(DomSanitizer);
 
-    /**
-     * Получить дашборд по ID
-     */
-    public async getDashboard(baseUrl: string, id: number, auth: MetabaseAuth): Promise<Observable<MetabaseDashboard>> {
-        const session: any = await firstValueFrom(this.http.post(`${baseUrl}/api/session`, auth));
-        const headers = new HttpHeaders().set('X-Metabase-Session', session.id);
+  /**
+   * Получить дашборд по ID
+   */
+  public async getDashboard(baseUrl: string, id: number, auth: MetabaseAuth): Promise<Observable<MetabaseDashboard>> {
+    const session: any = await firstValueFrom(this.http.post(`${baseUrl}/api/session`, auth));
+    const headers = new HttpHeaders().set('X-Metabase-Session', session.id);
 
-        return this.http.get<MetabaseDashboard>(`${baseUrl}/api/dashboard/${id}`, {headers});
+    return this.http.get<MetabaseDashboard>(`${baseUrl}/api/dashboard/${id}`, {headers});
+  }
+
+  /**
+   * Получить карточки, сгруппированные по вкладкам
+   */
+  public async getGroupedCardsByTabs(baseUrl: string, dashboardId: number, auth: MetabaseAuth): Promise<Observable<TabInfo[]>> {
+    return (await this.getDashboard(baseUrl, dashboardId, auth)).pipe(
+      map(dashboard => this.groupCardsByTab(dashboard))
+    );
+  }
+
+  /**
+   * Сгруппировать карточки по вкладкам
+   */
+  public groupCardsByTab(dashboardData: MetabaseDashboard): TabInfo[] {
+    const tabMap: TabMap = {};
+    const groupedCards: TabInfo[] = [];
+
+    if (dashboardData.tabs.length) {
+      dashboardData.tabs.forEach((tab: MetabaseTab) => {
+        tabMap[tab.id] = {
+          id: tab.id,
+          name: tab.name,
+          cards: []
+        };
+      });
+    } else {
+      groupedCards.push({
+        id: null,
+        cards: []
+      });
     }
 
-    /**
-     * Получить карточки, сгруппированные по вкладкам
-     */
-    public async getGroupedCardsByTabs(baseUrl: string, dashboardId: number, auth: MetabaseAuth): Promise<Observable<TabMap>> {
-        return (await this.getDashboard(baseUrl, dashboardId, auth)).pipe(
-            map(dashboard => this.groupCardsByTab(dashboard))
-        );
-    }
+    dashboardData.dashcards.forEach(dashcard => {
+      const tabId = dashcard.dashboard_tab_id;
 
-    /**
-     * Сгруппировать карточки по вкладкам
-     */
-    public groupCardsByTab(dashboardData: MetabaseDashboard): TabMap {
-        const tabMap: TabMap = {};
-        
-        dashboardData.tabs.forEach((tab: MetabaseTab) => {
-            tabMap[tab.id] = {
-                name: tab.name,
-                cards: []
-            };
+      if (tabMap[tabId]) {
+        tabMap[tabId].cards.push({
+          id: dashcard.card.id,
+          name: dashcard.card.name,
+          display: dashcard.card.display,
+          description: dashcard.card.description
         });
-
-        dashboardData.dashcards.forEach(dashcard => {
-            const tabId = dashcard.dashboard_tab_id;
-            
-            if (tabMap[tabId]) {
-                tabMap[tabId].cards.push({
-                    id: dashcard.card.id,
-                    name: dashcard.card.name,
-                    display: dashcard.card.display,
-                    description: dashcard.card.description
-                });
-            }
+      } else {
+        groupedCards[0].cards.push({
+          id: dashcard.card.id,
+          name: dashcard.card.name,
+          display: dashcard.card.display,
+          description: dashcard.card.description
         });
-        
-        return tabMap;
-    }
+      }
+    });
 
-    /**
-     * Получить карточки по имени вкладки
-     */
-    getCardsByTabName(dashboardData: MetabaseDashboard, tabName: string): TabCard[] | null {
-        const tabMap = this.groupCardsByTab(dashboardData);
-        
-        const tabEntry = Object.entries(tabMap).find(([_, tabInfo]) => 
-            tabInfo.name === tabName
-        );
-        
-        return tabEntry ? tabEntry[1].cards : null;
-    }
+    return Object.values(tabMap).length ? Object.values(tabMap) : groupedCards;
+  }
 
-    public getSafeDashboardUrl(baseUrl: string, dashboardId: string): SafeResourceUrl {
-        const url = `${baseUrl}/public/dashboard/${dashboardId}`;
-        return this.sanitizer.bypassSecurityTrustResourceUrl(url);
-    }
+  public getSafeDashboardUrl(baseUrl: string, dashboardId: string): SafeResourceUrl {
+    const url = `${baseUrl}/public/dashboard/${dashboardId}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
 
   public getAuthCredentials(userVar: any, passVar: any): MetabaseAuth {
     return {

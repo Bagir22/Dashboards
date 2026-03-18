@@ -99,9 +99,8 @@ export class AiAssistantComponent implements OnChanges, OnInit {
           ...msg,
           timestamp: new Date(msg.timestamp)
         }));
-      } else {
-        this.addWelcomeMessage();
       }
+      this.scrollToBottom();
     } catch (error) {
       console.error('Ошибка при загрузке истории сообщений:', error);
       this.addWelcomeMessage();
@@ -112,12 +111,12 @@ export class AiAssistantComponent implements OnChanges, OnInit {
    * Добавление приветственного сообщения
    */
   private addWelcomeMessage(): void {
-    this.messages = [{
-      text: 'Здравствуйте! Я ИИ-ассистент. Какую часть дашборда (вкладку или конкретный график) мне проанализировать для вас?',
+    this.messages.push({
+      text: 'Здравствуйте! Я ИИ-ассистент. Выберите что мне проанализировать для вас.',
       isUser: false,
       timestamp: new Date(),
       isNotification: true,
-    }];
+    });
     this.saveMessagesToStorage();
   }
 
@@ -147,9 +146,12 @@ export class AiAssistantComponent implements OnChanges, OnInit {
   private async getCards() {
     if (!this.currentDashboardId) return;
     const authData = this.metabaseService.getAuthCredentials("admin@example.com", "Admin123Qwerty");
-    await lastValueFrom(await this.metabaseService.getGroupedCardsByTabs(this.baseUrl, this.currentDashboardId, authData)).then(
-      response => this.groupedCardsbyTabs = Object.values(response)
-    );
+    await lastValueFrom(await this.metabaseService.getGroupedCardsByTabs(this.baseUrl, this.currentDashboardId, authData))
+      .then((response) => {
+        this.groupedCardsbyTabs = response;
+        if (this.groupedCardsbyTabs?.length && this.groupedCardsbyTabs?.length === 1)
+          this.selectedTabIndex = 0;
+      });
   }
 
   protected renderMarkdown(text: string): SafeHtml {
@@ -172,7 +174,7 @@ export class AiAssistantComponent implements OnChanges, OnInit {
       return;
     }
 
-    this.addUserMessage(entity.name);
+    this.addUserMessage(entity?.name ?? 'дашборд');
     this.addAssistantMessage();
 
     this.setLoadingState(true);
@@ -192,7 +194,8 @@ export class AiAssistantComponent implements OnChanges, OnInit {
   }
 
   protected clearChoice() {
-    this.selectedTabIndex = undefined;
+    if (this.groupedCardsbyTabs?.length && this.groupedCardsbyTabs?.length > 1)
+      this.selectedTabIndex = undefined;
   }
 
   // Проверка возможности выполнения действия
