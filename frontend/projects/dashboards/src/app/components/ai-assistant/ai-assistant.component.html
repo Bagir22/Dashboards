@@ -27,7 +27,7 @@
   <div class="messages-container" #messagesContainer>
     <ng-container *ngFor="let msg of messages; let i = index">
       <div class="date-separator" *ngIf="shouldShowDateSeparator(i)">
-        <span class="date-label">{{ formatMessageDate(msg.timestamp) }}</span>
+        <span class="date-label">{{ DateHelper.FormatMessageDate(msg.timestamp) }}</span>
       </div>
 
       <div class="message" [class.user-message]="msg.isUser" [class.assistant-message]="!msg.isUser">

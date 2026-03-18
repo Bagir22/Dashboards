@@ -5,7 +5,7 @@ import {
   MetabaseTab,
   MetabaseAuth,
   Dashboard, TabInfo
-} from './metabase.model';
+} from '../models/metabase.model';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';

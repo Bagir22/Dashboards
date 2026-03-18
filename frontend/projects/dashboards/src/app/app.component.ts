@@ -4,11 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { TuiRoot, TuiButton, TuiTextfield, TuiDataList, TuiDropdown, TuiHint } from '@taiga-ui/core';
 import { TuiTabs } from '@taiga-ui/kit';
-import { AppService } from './app.service';
+import { AppService } from './services/app.service';
 import {TuiActiveZone} from '@taiga-ui/cdk';
-import { AiAssistantComponent } from './ai-assistant/ai-assistant.component';
-import { MetabaseService } from './metabase/metabase.service';
-import { Dashboard } from './metabase/metabase.model';
+import { AiAssistantComponent } from './components/ai-assistant/ai-assistant.component';
+import { MetabaseService } from './services/metabase.service';
+import { Dashboard } from './models/metabase.model';
 
 declare const METABASE_URL: string;
 declare const METABASE_USER: string;
