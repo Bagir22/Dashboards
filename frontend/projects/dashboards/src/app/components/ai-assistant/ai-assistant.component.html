@@ -17,11 +17,15 @@
         <span class="material-icons-outlined">delete_outline</span>
       </button>
       <button
+        *ngIf="!isLoading"
+        type="button"
         class="close-btn"
         (click)="close.emit()"
-        *ngIf="!isLoading"
-        title="Закрыть">
-        ✕
+        tuiIconButton
+        size="xs"
+        title="Закрыть"
+      >
+        <span class="material-icons-outlined">close</span>
       </button>
     </div>
   </div>
@@ -79,7 +83,7 @@
         </button>
       }
       <button
-        class="action-btn"
+        class="action-btn action"
         [disabled]="isLoading"
         (click)="executeAction(groupedCardsbyTabs[selectedTabIndex])">
         <span class="action-text">
@@ -89,7 +93,7 @@
       @if (groupedCardsbyTabs[selectedTabIndex].cards.length > 1) {
         <button
           *ngFor="let card of groupedCardsbyTabs[selectedTabIndex].cards"
-          class="action-btn"
+          class="action-btn action"
           [disabled]="isLoading"
           (click)="executeAction(card)">
           <span class="action-text"> График {{ card.name }}</span>
@@ -98,7 +102,7 @@
     } @else {
       <div *ngFor="let tab of groupedCardsbyTabs; let i = index">
         <button
-          class="action-btn"
+          class="action-btn action"
           [disabled]="isLoading"
           (click)="executeAction(tab, i)">
           <span class="action-text">Вкладка {{ tab.name }}</span>
