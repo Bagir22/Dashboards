@@ -50,26 +50,37 @@
   .header-right {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 16px;
+  }
+
+  .clear-history-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+
+    .material-icons-outlined {
+      color: var(--tui-text-tertiary);
+    }
+
+    &:hover .material-icons-outlined {
+      color: var(--tui-text-secondary);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
   }
 
   .close-btn {
-    width: 28px;
-    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-    font-size: 18px;
-    color: #6c757d;
-    cursor: pointer;
-    transition: all 0.2s;
+    background: none;
+    color: var(--tui-text-tertiary);
 
     &:hover {
-      background: #e9ecef;
-      color: #212529;
+      color: var(--tui-text-secondary);
     }
   }
 }
@@ -325,6 +336,10 @@
   overflow: hidden;
   margin-bottom: 8px;
 
+  &.action {
+    background: #0D9DDE17;
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -338,8 +353,8 @@
   }
 
   &:hover:not(:disabled) {
-    background: #ffffff;
-    border-color: #4299e1;
+    background: var(--tui-background-base);
+    border-color: var(--tui-background-accent-1);
     transform: translateY(-1px);
     box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
@@ -366,7 +381,7 @@
 
   &.primary {
     background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-    border-color: #3182ce;
+    border-color: var(--tui-background-accent-1);
     color: white;
     box-shadow: 0 4px 6px -1px rgba(66, 153, 225, 0.2);
 
@@ -452,27 +467,6 @@
     border-radius: 16px;
     font-size: 12px;
     color: var(--tui-text-02);
-  }
-}
-
-.clear-history-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: opacity 0.2s;
-
-  .material-icons-outlined {
-    color: var(--tui-text-tertiary);
-  }
-
-  &:hover .material-icons-outlined {
-    color: var(--tui-text-secondary);
-  }
-
-  &:disabled {
-    cursor: not-allowed;
   }
 }
 
