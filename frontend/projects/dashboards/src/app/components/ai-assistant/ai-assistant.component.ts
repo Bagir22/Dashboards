@@ -2,10 +2,11 @@ import { Component, ViewChild, ElementRef, inject, Input, Output, EventEmitter, 
 import { CommonModule } from '@angular/common';
 import { marked } from 'marked';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { lastValueFrom } from 'rxjs';
 import { MetabaseService } from '../../services/metabase.service';
 import { TabCard, TabInfo } from '../../models/metabase.model';
 import { DateHelper } from '../../helpers/date-helper';
-import {TuiButton} from "@taiga-ui/core";
+import { TuiButton } from "@taiga-ui/core";
 
 export interface Message {
   text: string;
