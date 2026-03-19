@@ -6,14 +6,8 @@ import { lastValueFrom } from 'rxjs';
 import { MetabaseService } from '../../services/metabase.service';
 import { TabCard, TabInfo } from '../../models/metabase.model';
 import { DateHelper } from '../../helpers/date-helper';
-import {TuiButton, TuiHint} from "@taiga-ui/core";
-
-export interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  isNotification: boolean;
-}
+import { TuiButton, TuiHint } from '@taiga-ui/core';
+import { Message, MessagesHistory } from '../../models/ai.model';
 
 @Component({
   selector: 'app-ai-assistant',
@@ -27,9 +21,10 @@ export class AiAssistantComponent implements OnChanges, OnInit {
 
   @Input() currentDashboardName: string | null = null;
   @Input() currentDashboardId: number | null = null;
-  @Input() baseUrl: string = "";
+  @Input() baseUrl: string = '';
   @Output() close = new EventEmitter<void>();
 
+  private history: MessagesHistory[] = [];
   messages: Message[] = [];
 
   private readonly STORAGE_KEY = 'ai_assistant_messages';
@@ -59,6 +54,7 @@ export class AiAssistantComponent implements OnChanges, OnInit {
 
     if (dashboardIdChanges?.currentValue !== dashboardIdChanges?.previousValue) {
       this.getCards();
+      this.loadMessagesFromStorage();
     }
   }
 
@@ -96,12 +92,15 @@ export class AiAssistantComponent implements OnChanges, OnInit {
     try {
       const savedMessages = localStorage.getItem(this.STORAGE_KEY);
       if (savedMessages) {
-        const parsedMessages = JSON.parse(savedMessages);
-        this.messages = parsedMessages.map((msg: any) => ({
+        this.history = JSON.parse(savedMessages) ?? [];
+        this.messages = this.history
+          .find((history) => history.dashboardId === this.currentDashboardId)?.messages
+          ?.map((msg: any) => ({
           ...msg,
           timestamp: new Date(msg.timestamp)
-        }));
+        })) ?? [];
       }
+      if (!this.messages.length) this.addWelcomeMessage();
       this.scrollToBottom();
     } catch (error) {
       console.error('Ошибка при загрузке истории сообщений:', error);
@@ -128,7 +127,13 @@ export class AiAssistantComponent implements OnChanges, OnInit {
   private saveMessagesToStorage(): void {
     try {
       const messagesToSave = this.messages.slice(-this.MAX_STORED_MESSAGES);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(messagesToSave));
+      const dashboardHistoryIndex = this.history.findIndex((history) => history.dashboardId === this.currentDashboardId);
+      if (dashboardHistoryIndex >= 0) {
+        this.history[dashboardHistoryIndex].messages = messagesToSave;
+      } else {
+        this.history.push({dashboardId: this.currentDashboardId ?? 0, messages: this.messages});
+      }
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.history));
     } catch (error) {
       console.error('Ошибка при сохранении истории сообщений:', error);
     }
@@ -139,7 +144,10 @@ export class AiAssistantComponent implements OnChanges, OnInit {
    */
   protected clearHistory(): void {
     if (confirm('Очистить историю сообщений?')) {
-      localStorage.removeItem(this.STORAGE_KEY);
+      const dashboardHistoryIndex = this.history.findIndex((history) => history.dashboardId === this.currentDashboardId);
+      this.history.splice(dashboardHistoryIndex, 1);
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.history));
+      if (!this.history.length) localStorage.removeItem(this.STORAGE_KEY);
       this.messages = [];
       this.addWelcomeMessage();
       this.scrollToBottom();
@@ -179,6 +187,7 @@ export class AiAssistantComponent implements OnChanges, OnInit {
 
     this.addUserMessage(entity?.name ?? 'дашборд');
     this.addAssistantMessage();
+    this.scrollToBottom();
 
     this.setLoadingState(true);
 
@@ -355,8 +364,6 @@ export class AiAssistantComponent implements OnChanges, OnInit {
     if (!lastMessage.isUser) {
       lastMessage.text = this.currentStreamingMessage;
     }
-
-    this.scrollToBottom();
   }
 
   // Обработка ошибок стриминга
