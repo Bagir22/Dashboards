@@ -1,0 +1,113 @@
+<div class="ai-assistant">
+  <div class="ai-header">
+    <div class="header-left">
+      <h3>ИИ-ассистент</h3>
+      <span class="dashboard-indicator" *ngIf="currentDashboardName" [title]="'Анализ дашборда: ' + currentDashboardName">
+        <span class="material-icons-outlined">analytics</span>
+        {{ currentDashboardName }}
+      </span>
+    </div>
+    <div class="header-right">
+      <button
+        class="clear-history-btn"
+        (click)="clearHistory()"
+        *ngIf="messages.length > 1 && !isLoading"
+        title="Очистить историю"
+      >
+        <span class="material-icons-outlined">delete_outline</span>
+      </button>
+      <button
+        *ngIf="!isLoading"
+        type="button"
+        class="close-btn"
+        (click)="close.emit()"
+        tuiIconButton
+        size="xs"
+        title="Закрыть"
+      >
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="messages-container" #messagesContainer>
+    <ng-container *ngFor="let msg of messages; let i = index">
+      <div class="date-separator" *ngIf="shouldShowDateSeparator(i)">
+        <span class="date-label">{{ DateHelper.FormatMessageDate(msg.timestamp) }}</span>
+      </div>
+
+      <div class="message" [class.user-message]="msg.isUser" [class.assistant-message]="!msg.isUser">
+        <div class="message-content-wrapper">
+          <div class="message-content markdown-content" [innerHTML]="renderMarkdown(msg.text)"></div>
+          <div class="message-footer">
+            <span class="message-time">{{ msg.timestamp | date:'HH:mm' }}</span>
+            <button
+              *ngIf="!msg.isUser && !msg.isNotification && msg.text"
+              class="copy-btn"
+              (click)="copyToClipboard(msg.text, i)"
+              [title]="copySuccess === i ? 'Скопировано!' : 'Копировать ответ'"
+              [class.copy-success]="copySuccess === i"
+            >
+              @if (copySuccess === i) {
+                <span class="material-icons-outlined">done</span>
+              } @else {
+                <span class="material-icons-outlined">content_copy</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <div *ngIf="isLoading && currentStreamingMessage" class="streaming-indicator">
+      <span class="typing-indicator">Печатает...</span>
+    </div>
+
+    <button
+      *ngIf="isLoading && currentStreamingMessage"
+      class="cancel-btn"
+      (click)="cancelRequest()"
+      title="Отменить запрос">
+      <span class="cancel-text">Отмена</span>
+    </button>
+  </div>
+
+  <div class="actions-grid" *ngIf="groupedCardsbyTabs">
+    @if (selectedTabIndex !== undefined) {
+      @if (groupedCardsbyTabs[selectedTabIndex].id) {
+        <button
+          class="action-btn"
+          [disabled]="isLoading"
+          (click)="clearChoice()">
+          <span class="action-text">Назад</span>
+        </button>
+      }
+      <button
+        class="action-btn action"
+        [disabled]="isLoading"
+        (click)="executeAction(groupedCardsbyTabs[selectedTabIndex])">
+        <span class="action-text">
+          {{ groupedCardsbyTabs[selectedTabIndex].name ? 'Вкладка ' + groupedCardsbyTabs[selectedTabIndex].name : 'Дашборд' }}
+        </span>
+      </button>
+      @if (groupedCardsbyTabs[selectedTabIndex].cards.length > 1) {
+        <button
+          *ngFor="let card of groupedCardsbyTabs[selectedTabIndex].cards"
+          class="action-btn action"
+          [disabled]="isLoading"
+          (click)="executeAction(card)">
+          <span class="action-text"> График {{ card.name }}</span>
+        </button>
+      }
+    } @else {
+      <div *ngFor="let tab of groupedCardsbyTabs; let i = index">
+        <button
+          class="action-btn action"
+          [disabled]="isLoading"
+          (click)="executeAction(tab, i)">
+          <span class="action-text">Вкладка {{ tab.name }}</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

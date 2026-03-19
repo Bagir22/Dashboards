@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { TuiRoot, TuiButton, TuiTextfield, TuiDataList, TuiDropdown, TuiHint } from '@taiga-ui/core';
 import { TuiTabs } from '@taiga-ui/kit';
-import { AppService, Dashboard } from './app.service';
+import { AppService } from './services/app.service';
 import {TuiActiveZone} from '@taiga-ui/cdk';
-import { AiAssistantComponent } from './ai-assistant/ai-assistant.component';
+import { AiAssistantComponent } from './components/ai-assistant/ai-assistant.component';
+import { MetabaseService } from './services/metabase.service';
+import { Dashboard } from './models/metabase.model';
 
 declare const METABASE_URL: string;
 declare const METABASE_USER: string;
@@ -34,6 +36,7 @@ export class AppComponent implements OnInit {
   @Input('metabase-url') public metabaseUrl: string = '';
 
   private readonly appService = inject(AppService);
+  private readonly metabaseService = inject(MetabaseService);
   private readonly cdr = inject(ChangeDetectorRef);
   public readonly exportFormats = ['csv', 'xlsx', 'json'];
 
@@ -82,6 +85,7 @@ export class AppComponent implements OnInit {
   }
 
   public onTabClick(index: number): void {
+    console.log(this.getCurrentDashboardId())
     const selected = this.filteredDashboards[index];
     if (!selected) return;
 
@@ -106,10 +110,26 @@ export class AppComponent implements OnInit {
   public async downloadDashboard(format: string): Promise<void> {
     this.isExportMenuOpen = false;
     const active = this.dashboards[this.activeIndex];
-    const auth = this.appService.getAuthCredentials(METABASE_USER, METABASE_PASS);
+    const auth = this.metabaseService.getAuthCredentials(METABASE_USER, METABASE_PASS);
     if (active) {
-      await this.appService.downloadDashboardData(this.baseUrl, active.id, format, auth);
+      await this.metabaseService.downloadDashboardData(this.baseUrl, active.id, format, auth);
     }
+  }
+
+  public clearSearch(): void {
+    this.searchQuery = '';
+    this.onSearchChange();
+  }
+
+  public resetDashboard(): void {
+    const currentUrl = this.safeUrl;
+    this.safeUrl = undefined;
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.safeUrl = currentUrl;
+      this.cdr.detectChanges();
+    }, 50);
   }
 
   public onEscapePress() {
@@ -126,8 +146,8 @@ export class AppComponent implements OnInit {
     return this.dashboards[this.activeIndex]?.name || '';
   }
 
-  getCurrentDashboardId(): string | null {
-    return this.dashboards[this.activeIndex]?.public_uuid || null;
+  getCurrentDashboardId(): number | null {
+    return this.dashboards[this.activeIndex]?.id || null;
   }
 
   private get baseUrl(): string {
@@ -139,9 +159,9 @@ export class AppComponent implements OnInit {
       this.isLoading = false;
       return;
     }
-    const auth = this.appService.getAuthCredentials(METABASE_USER, METABASE_PASS);
+    const auth = this.metabaseService.getAuthCredentials(METABASE_USER, METABASE_PASS);
     try {
-      this.dashboards = await this.appService.fetchDashboards(this.baseUrl, auth);
+      this.dashboards = await this.metabaseService.fetchDashboards(this.baseUrl, auth);
       if (this.dashboards.length > 0) {
         this.activeIndex = 0;
         this.updateIframe();
@@ -157,7 +177,7 @@ export class AppComponent implements OnInit {
   private updateIframe(): void {
     const active = this.dashboards[this.activeIndex];
     if (active) {
-      this.safeUrl = this.appService.getSafeDashboardUrl(this.baseUrl, active.public_uuid);
+      this.safeUrl = this.metabaseService.getSafeDashboardUrl(this.baseUrl, active.public_uuid);
       this.cdr.detectChanges();
     }
   }

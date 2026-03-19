@@ -8,5 +8,8 @@ namespace Domain.Entities
         public int Number {  get; set; }
         public Guid GroupId { get; set; }
         public Group Group { get; set; } = null!;
+
+        public List<SheetDiscipline> SheetDisciplines { get; set; } = new();
+        public List<Plan> Plans { get; set; } = new();
     }
 }

@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Infrastructure.Analysis.Services.AIService;
 using Infrastructure.ETLPipeline;
 using Infrastructure.ETLPipeline.ExceptionHandler;
 using Infrastructure.ETLPipeline.Extract.Achivment;
@@ -18,6 +19,8 @@ using Infrastructure.ETLPipeline.Extract.Mark;
 using Infrastructure.ETLPipeline.Extract.Order;
 using Infrastructure.ETLPipeline.Extract.OrderCategory;
 using Infrastructure.ETLPipeline.Extract.Organization;
+using Infrastructure.ETLPipeline.Extract.Plan;
+using Infrastructure.ETLPipeline.Extract.SheetDiscipline;
 using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
@@ -29,6 +32,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Net.Http.Headers;
 
 
 namespace Infrastructure
@@ -52,17 +56,21 @@ namespace Infrastructure
             InitHangfire( services );
 
             services.AddHostedService<Worker>();
+            services.AddHttpClient<IMetabaseService, MetabaseService>();
 
-            // Регистрация Metabase
-            services.AddHttpClient<IMetabaseService, MetabaseService>()
-                .ConfigureHttpClient(client =>
-                {
-                    client.BaseAddress = new Uri("http://metabase:3000/");
-                });
-
-
+            AddLLMService(services);
 
             return services;
+        }
+
+        private static void AddLLMService(IServiceCollection services)
+        {
+            services.AddHttpClient<IAIService, AIService>();
+
+            services.ConfigureHttpClientDefaults(conf => conf.ConfigureHttpClient(conf => {
+                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "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");
+                conf.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            }));
         }
 
         private static void InitDB( IServiceCollection services )
@@ -109,6 +117,8 @@ namespace Infrastructure
             services.AddHttpClient<IDiscipline, DisciplineRequest>();
             services.AddHttpClient<IMark, MarkRequest>();
             services.AddHttpClient<IGroupRequest, GroupRequest>();
+            services.AddHttpClient<IPlanRequest, PlanRequest>();
+            services.AddHttpClient<ISheetDisciplineRequest, SheetDisciplineRequest>();
         }
 
         public static IHost MigrateInfrastructure( this IHost host )

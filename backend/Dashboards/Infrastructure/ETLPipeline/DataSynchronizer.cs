@@ -15,6 +15,8 @@ using Infrastructure.ETLPipeline.Extract.Mark;
 using Infrastructure.ETLPipeline.Extract.Order;
 using Infrastructure.ETLPipeline.Extract.OrderCategory;
 using Infrastructure.ETLPipeline.Extract.Organization;
+using Infrastructure.ETLPipeline.Extract.Plan;
+using Infrastructure.ETLPipeline.Extract.SheetDiscipline;
 using Infrastructure.ETLPipeline.Extract.Student;
 using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
@@ -48,6 +50,8 @@ namespace Infrastructure.ETLPipeline
         IOrderCategoryRequest orderCategoryRequest,
         IOrderRequest orderRequest,
         IGroupRequest groupRequest,
+        IPlanRequest planRequest,
+        ISheetDisciplineRequest sheetDisciplineRequest,
         IMemoryCache memoryCache,
         ILogger<DataSynchronizer> logger ): IDataSynchronizer
     {
@@ -91,7 +95,10 @@ namespace Infrastructure.ETLPipeline
                 await AddStudentsLoopAsync(token, date);
             }
 
-            await SynchronizeOrdersAsync(token);
+            await SynchronizeOrdersAndAchivmentsAsync(token);
+
+            await SynchronizePlansAsync(token);
+            await SynchronizeSheetsAsync(token);
         }
 
         public async Task UpdateData()
@@ -166,7 +173,7 @@ namespace Infrastructure.ETLPipeline
                 AddressStates = GetCachedDictionary( CacheKeys.AddressStates ),
                 TrainingLevels = GetCachedDictionary( CacheKeys.TrainingLevels ),
                 Groups = GetCachedDictionary( CacheKeys.Groups ),
-                GroupBranches = memoryCache.Get<Dictionary<Guid, Guid>>(CacheKeys.GroupBranch) ?? new()
+                GroupBranches = GetCachedDictionary(CacheKeys.GroupBranch)
             };
 
             await SynchronizeAddressStatesAsync( externalStudents.Items );
@@ -178,6 +185,7 @@ namespace Infrastructure.ETLPipeline
 
             var newContingentStudents = externalStudents.Items
                 .Where(f => !existingContingentIds.Contains(Guid.Parse(f.StudentExternalId)))
+                .DistinctBy(f => f.StudentExternalId)
                 .ToList();
 
             if (!newContingentStudents.Any())
@@ -209,10 +217,8 @@ namespace Infrastructure.ETLPipeline
                     BenefitId = cache.Benefits.GetNullableValue(s.Benefit),
                     OrganizationId = cache.Organizations.GetNullableValue(s.TargetOrganizationName),
                     TrainingLevelId = cache.TrainingLevels.GetNullableValue(s.TrainingLevel),
-                    GroupId = Guid.Parse(s.GroupId),
-                    BranchId = cache.GroupBranches.TryGetValue(Guid.Parse(s.GroupId), out var branchId)
-                        ? branchId
-                        : null
+                    GroupId = cache.Groups.GetNullableValue(s.GroupName),
+                    BranchId = cache.GroupBranches.GetNullableValue(s.GroupName)
                 }).ToList();
             }
 
@@ -284,7 +290,8 @@ namespace Infrastructure.ETLPipeline
 
             Dictionary<string, Guid> parsed = existingStates
                 .Concat( newStates )
-                .ToDictionary( sh => sh.Name, sh => sh.Id );
+                .GroupBy(s => s.Name)
+                .ToDictionary(g => g.Key, g => g.First().Id);
 
             memoryCache.Set( CacheKeys.AddressStates, parsed );
         }
@@ -325,14 +332,14 @@ namespace Infrastructure.ETLPipeline
             if (toDelete.Any())
                 dbContext.Groups.RemoveRange(toDelete);
 
-            memoryCache.Remove(CacheKeys.AchivmentCategories);
+            memoryCache.Remove(CacheKeys.Groups);
 
             Dictionary<string, Guid> parsed = new Dictionary<string, Guid>();
             parsedGroups.ForEach(c => parsed.TryAdd(c.Name, c.Id));
             memoryCache.Set(CacheKeys.Groups, parsed);
 
-            Dictionary<Guid, Guid> branches = new Dictionary<Guid, Guid>();
-            externalGroups.ForEach(g => branches.TryAdd(Guid.Parse(g.Id), Guid.Parse(g.Branch.Id)));
+            Dictionary<string, Guid> branches = new Dictionary<string, Guid>();
+            externalGroups.ForEach(g => branches.TryAdd(g.Name, Guid.Parse(g.Branch.Id)));
             memoryCache.Set(CacheKeys.GroupBranch, branches);
 
             await dbContext.SaveChangesAsync();
@@ -414,108 +421,195 @@ namespace Infrastructure.ETLPipeline
             await dbContext.SaveChangesAsync();
         }
 
-        private async Task SynchronizeOrdersAsync(string token)
+        private async Task SynchronizePlansAsync(string token)
         {
-            var studentIds = await dbContext.Students
-                .Select(s => s.Id)
-                .ToHashSetAsync();
+            var semesters = await dbContext.Semesters.ToListAsync();
 
-            if (studentIds.Count == 0)
+            if (semesters.Count == 0)
                 return;
 
-            var orderCategoryCache = GetCachedDictionary(CacheKeys.OrderCategories);
-            var achivmentCategoryCache = GetCachedDictionary(CacheKeys.AchivmentCategories);
+            var disciplineCache = GetCachedDictionary(CacheKeys.Disciplines);
 
-            var existingOrders = await dbContext.Orders
-                .Where(o => studentIds.Contains(o.StudentId))
-                .Select(o => o.Id)
-                .ToHashSetAsync();
+            var existingPlans = await dbContext.Plans.ToListAsync();
 
-            var existingAchivments = await dbContext.Achivments
-                .Where(a => studentIds.Contains(a.StudentId))
-                .Select(a => a.Id)
-                .ToHashSetAsync();
-
-            List<Order> newOrders = new();
-            List<Achivment> newAchivments = new();
-
-            foreach (var studentId in studentIds)
+            foreach (var semester in semesters)
             {
-                await ProcessStudentOrdersAsync(
-                    token,
-                    studentId,
-                    orderCategoryCache,
-                    existingOrders,
-                    newOrders);
+                await ProcessPlansAsync(token, semester, disciplineCache);
             }
-
-            await SaveNewEntitiesAsync(newOrders, newAchivments);
         }
 
-        private async Task SynchronizeOrdersAndAchivmentsAsync(string token, List<Guid> studentIds)
+        private async Task ProcessPlansAsync(
+            string token,
+            Semester semester,
+            Dictionary<string, Guid> disciplineCache)
         {
+            var externalPlans = await planRequest.GetAllPlansAsync(
+                token,
+                semester.GroupId,
+                semester.Number);
+
+            if (externalPlans == null || externalPlans.Count == 0)
+                return;
+
+            var existingPlans = await dbContext.Plans
+                .Where(p => p.SemesterId == semester.Id)
+                .Select(p => p.DisciplineId)
+                .ToHashSetAsync();
+
+            var newPlans = new List<Plan>();
+
+            foreach (var p in externalPlans)
+            {
+                if (!disciplineCache.TryGetValue(p.Name, out var disciplineId))
+                {
+                    logger.LogWarning(
+                        "Discipline '{DisciplineName}' not found in cache",
+                        p.Name);
+
+                    continue;
+                }
+
+                if (!existingPlans.Add(disciplineId))
+                    continue;
+
+                newPlans.Add(new Plan
+                {
+                    DisciplineId = disciplineId,
+                    SemesterId = semester.Id
+                });
+            }
+
+            if (newPlans.Count == 0)
+                return;
+
+            await dbContext.Plans.AddRangeAsync(newPlans);
+            await dbContext.SaveChangesAsync();
+        }
+
+        private async Task SynchronizeSheetsAsync(string token)
+        {
+            var semesters = await dbContext.Semesters.ToListAsync();
+
+            if (semesters.Count == 0)
+                return;
+
+            var existingPlans = await dbContext.Plans.ToListAsync();
+
+            var today = DateTime.UtcNow;
+
+            foreach (var semester in semesters)
+            {
+                await ProcessSheetsAsync(token, semester, today);
+            }
+        }
+
+        private async Task ProcessSheetsAsync(
+            string token,
+            Semester semester,
+            DateTime today)
+        {
+            var disciplines = await dbContext.Plans
+                .Where(p => p.SemesterId == semester.Id)
+                .Select(p => p.DisciplineId)
+                .ToHashSetAsync();
+
+            var newSheets = new List<SheetDiscipline>();
+
+            foreach (var discipline in disciplines)
+            {
+                var externalSheets = await sheetDisciplineRequest.GetAllSheetsDisciplineAsync(
+                    token,
+                    semester.GroupId,
+                    discipline,
+                    today,
+                    semester.Number,
+                    false
+                    );
+
+                if (externalSheets == null || externalSheets.Count == 0)
+                    continue;
+
+                var newSheetsDiscipline = externalSheets.Select(s => new SheetDiscipline
+                {
+                    Id = Guid.NewGuid(),
+                    Retake = s.Retake,
+                    MarkDate = s.MarkDate,
+                    SemesterId = semester.Id,
+                    DisciplineId = discipline,
+                    StudentId = Guid.Parse(s.StudentId),
+                    MarkId = s.DisciplineMark != null ? Guid.Parse(s.DisciplineMark.Id) : null,
+                });
+
+                newSheets.AddRange(newSheetsDiscipline);
+            }
+
+
+
+            if (newSheets.Count == 0)
+                return;
+
+            await dbContext.SheetDisciplines.AddRangeAsync(newSheets);
+            await dbContext.SaveChangesAsync();
+        }
+
+        private async Task SynchronizeOrdersAndAchivmentsAsync(string token)
+        {
+            var studentIds = await dbContext.Students.Select( s => s.Id ).ToListAsync();
+
             if (studentIds.Count == 0)
                 return;
 
             var orderCategoryCache = GetCachedDictionary(CacheKeys.OrderCategories);
             var achivmentCategoryCache = GetCachedDictionary(CacheKeys.AchivmentCategories);
 
-            var existingOrders = await dbContext.Orders
-                .Where(o => studentIds.Contains(o.StudentId))
-                .Select(o => o.Id)
-                .ToHashSetAsync();
-
-            var existingAchivments = await dbContext.Achivments
-                .Where(a => studentIds.Contains(a.StudentId))
-                .Select(a => a.Id)
-                .ToHashSetAsync();
-
-            List<Order> newOrders = new();
-            List<Achivment> newAchivments = new();
-
             foreach (var studentId in studentIds)
             {
+                var existingOrders = await dbContext.Orders
+                    .Where(o => studentIds.Contains(o.StudentId))
+                    .Select(o => o.Id)
+                    .ToHashSetAsync();
+                
+                var existingAchivments = await dbContext.Achivments
+                    .Where(a => studentIds.Contains(a.StudentId))
+                    .Select(a => a.Id)
+                    .ToHashSetAsync();
+
                 await ProcessStudentOrdersAsync(
                     token,
                     studentId,
                     orderCategoryCache,
-                    existingOrders,
-                    newOrders);
-
+                    existingOrders);
+                
                 await ProcessStudentAchivmentsAsync(
                     token,
                     studentId,
                     achivmentCategoryCache,
-                    existingAchivments,
-                    newAchivments);
+                    existingAchivments);
             }
-
-            await SaveNewEntitiesAsync(newOrders, newAchivments);
         }
 
         private async Task ProcessStudentOrdersAsync(
             string token,
             Guid studentId,
             Dictionary<string, Guid> categoryCache,
-            HashSet<Guid> existingOrders,
-            List<Order> newOrders)
+            HashSet<Guid> existingOrders)
         {
-            List<OrderResponse> externalOrders;
-
-            externalOrders = await orderRequest.GetAllOrdersAsync(token, studentId.ToString());
+            var externalOrders = await orderRequest.GetAllOrdersAsync(token, studentId.ToString());
 
             if (externalOrders == null || externalOrders.Count == 0)
                 return;
 
+            var newOrders = new List<Order>();
+
             foreach (var order in externalOrders)
             {
                 if (order.DictOrdersCategories.DictOrderType == null ||
-                   !order.DictOrdersCategories.DictOrderType.Enums.Contains(4))
+                    !order.DictOrdersCategories.DictOrderType.Enums.Contains(4))
                     continue;
 
                 var orderId = Guid.Parse(order.Id);
 
-                if (existingOrders.Contains(orderId))
+                if (!existingOrders.Add(orderId))
                     continue;
 
                 var categoryId = categoryCache.GetNullableValue(order.DictOrdersCategories.Category);
@@ -523,22 +617,29 @@ namespace Infrastructure.ETLPipeline
                 if (categoryId == null)
                 {
                     logger.LogWarning(
-                        $"Order category not found in cache: {order.DictOrdersCategories.Category}");
+                        "Order category not found in cache: {Category}",
+                        order.DictOrdersCategories.Category);
                     continue;
                 }
-                    
 
                 newOrders.Add(CreateOrder(orderId, order, studentId, (Guid)categoryId));
             }
+
+            if (newOrders.Count == 0)
+                return;
+
+            await dbContext.Orders.AddRangeAsync(newOrders);
+            await dbContext.SaveChangesAsync();
         }
 
         private async Task ProcessStudentAchivmentsAsync(
             string token,
             Guid studentId,
             Dictionary<string, Guid> achivmentCategoryCache,
-            HashSet<Guid> existingAchivments,
-            List<Achivment> newAchivments)
+            HashSet<Guid> existingAchivments)
         {
+            List<Achivment> newAchivments = new();
+
             foreach (var category in achivmentCategoryCache)
             {
                 List<AchivmentResponse> externalAchivments;
@@ -562,6 +663,12 @@ namespace Infrastructure.ETLPipeline
                     newAchivments.Add(CreateAchivment(achId, ach, studentId, category.Value));
                 }
             }
+
+            if (newAchivments.Any())
+            {
+                await dbContext.Achivments.AddRangeAsync(newAchivments);
+                await dbContext.SaveChangesAsync();
+            }
         }
 
         private static Order CreateOrder(Guid orderId, OrderResponse order, Guid studentId, Guid categoryId)
@@ -584,18 +691,6 @@ namespace Infrastructure.ETLPipeline
                 StudentId = studentId,
                 CategoryId = categoryId
             };
-        }
-
-        private async Task SaveNewEntitiesAsync(List<Order> newOrders, List<Achivment> newAchivments)
-        {
-            if (newOrders.Any())
-                await dbContext.Orders.AddRangeAsync(newOrders);
-
-            if (newAchivments.Any())
-                await dbContext.Achivments.AddRangeAsync(newAchivments);
-
-            if (newOrders.Any() || newAchivments.Any())
-                await dbContext.SaveChangesAsync();
         }
 
         private async Task SynchronizeFacultiesAsync( string token )

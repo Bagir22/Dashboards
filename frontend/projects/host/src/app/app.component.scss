@@ -23,18 +23,15 @@ tui-root {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--tui-base-03);
   padding-bottom: 1rem;
   gap: 1rem;
 }
 
 .remote-slot {
-  background: #FFF;
-  border: 1px solid var(--tui-base-03);
+  background: var(--tui-background-base);
   border-radius: var(--tui-radius-l);
   min-height: 850px;
   padding: 1.5rem;
-  box-shadow: var(--tui-shadow-m);
 
   dashboards-mft {
     display: block;

@@ -1,38 +1,86 @@
+import { Observable, map } from 'rxjs';
+import {
+  MetabaseDashboard,
+  TabMap,
+  MetabaseTab,
+  MetabaseAuth,
+  Dashboard, TabInfo
+} from '../models/metabase.model';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 import JSZip from 'jszip';
 
-export interface Dashboard {
-  name: string;
-  id: number;
-  public_uuid: string;
-}
-
-export interface MetabaseAuth {
-  username?: string;
-  password?: string;
-}
-
 @Injectable({
   providedIn: 'root'
 })
-export class AppService {
+export class MetabaseService {
   private readonly http = inject(HttpClient);
   private readonly sanitizer = inject(DomSanitizer);
 
-  public get isAdmin(): boolean {
-    return localStorage.getItem('isAdmin') === 'true';
+  /**
+   * Получить дашборд по ID
+   */
+  public async getDashboard(baseUrl: string, id: number, auth: MetabaseAuth): Promise<Observable<MetabaseDashboard>> {
+    const session: any = await firstValueFrom(this.http.post(`${baseUrl}/api/session`, auth));
+    const headers = new HttpHeaders().set('X-Metabase-Session', session.id);
+
+    return this.http.get<MetabaseDashboard>(`${baseUrl}/api/dashboard/${id}`, {headers});
   }
 
-  public getBaseUrl(inputUrl: string, globalVar: any): string {
-    const raw = inputUrl || (typeof globalVar !== 'undefined' ? globalVar : '');
-    return String(raw).replace(/"/g, '').replace(/\/$/, '');
+  /**
+   * Получить карточки, сгруппированные по вкладкам
+   */
+  public async getGroupedCardsByTabs(baseUrl: string, dashboardId: number, auth: MetabaseAuth): Promise<Observable<TabInfo[]>> {
+    return (await this.getDashboard(baseUrl, dashboardId, auth)).pipe(
+      map(dashboard => this.groupCardsByTab(dashboard))
+    );
   }
 
-  public getAdminUrl(baseUrl: string): string {
-    return `${baseUrl}/admin/`;
+  /**
+   * Сгруппировать карточки по вкладкам
+   */
+  public groupCardsByTab(dashboardData: MetabaseDashboard): TabInfo[] {
+    const tabMap: TabMap = {};
+    const groupedCards: TabInfo[] = [];
+
+    if (dashboardData.tabs.length) {
+      dashboardData.tabs.forEach((tab: MetabaseTab) => {
+        tabMap[tab.id] = {
+          id: tab.id,
+          name: tab.name,
+          cards: []
+        };
+      });
+    } else {
+      groupedCards.push({
+        id: null,
+        cards: []
+      });
+    }
+
+    dashboardData.dashcards.forEach(dashcard => {
+      const tabId = dashcard.dashboard_tab_id;
+
+      if (tabMap[tabId]) {
+        tabMap[tabId].cards.push({
+          id: dashcard.card.id,
+          name: dashcard.card.name,
+          display: dashcard.card.display,
+          description: dashcard.card.description
+        });
+      } else {
+        groupedCards[0].cards.push({
+          id: dashcard.card.id,
+          name: dashcard.card.name,
+          display: dashcard.card.display,
+          description: dashcard.card.description
+        });
+      }
+    });
+
+    return Object.values(tabMap).length ? Object.values(tabMap) : groupedCards;
   }
 
   public getSafeDashboardUrl(baseUrl: string, dashboardId: string): SafeResourceUrl {
@@ -53,13 +101,7 @@ export class AppService {
     const list: any = await firstValueFrom(this.http.get(`${baseUrl}/api/dashboard`, { headers }));
 
     return (list || [])
-      .filter((d: any) => d.public_uuid !== null)
-      /* .map((d: any) => ({
-        name: d.name,
-        id: d.id,
-        public_uuid: d.public_uuid
-      }));
-      */
+      .filter((d: any) => d.public_uuid !== null);
   }
 
   public async downloadDashboardData(baseUrl: string, dashId: number, format: string, auth: MetabaseAuth) {

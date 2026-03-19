@@ -1,4 +1,5 @@
 using Application;
+using DotNetEnv;
 using Hangfire;
 using Infrastructure;
 using Prometheus;
@@ -14,6 +15,9 @@ namespace WebApi
 
             var builder = WebApplication.CreateBuilder( args );
 
+            Env.Load("../../../.env");
+            builder.Configuration.AddEnvironmentVariables();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             
@@ -21,6 +25,17 @@ namespace WebApi
             builder.Services.AddWebApi( builder.Configuration );
             builder.Services.AddInfrastructure( builder.Configuration );
             builder.Services.AddApplication();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularApp", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
 
             var app = builder.Build();
 
@@ -35,6 +50,8 @@ namespace WebApi
             }
 
             app.UseRouting();
+
+            app.UseCors("AllowAngularApp");
 
             app.UseAuthorization();
 
