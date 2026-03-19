@@ -30,7 +30,9 @@ namespace WebApi
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
+                    var host = Environment.GetEnvironmentVariable("BASE_URL");
+                    var port = Environment.GetEnvironmentVariable("HOST_PORT");
+                    policy.WithOrigins($"http://{host}:{port}")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
