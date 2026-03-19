@@ -40,6 +40,7 @@ namespace Infrastructure
     public static class InfrastructureExtensions
     {
         private static readonly string _connectionString = Environment.GetEnvironmentVariable( "DB_CONNECTION_STRING" ) ?? String.Empty;
+        private static readonly string _aiApiAuthToken = Environment.GetEnvironmentVariable("AI_API_AUTH_TOKEN") ?? String.Empty;
         public static IServiceCollection AddInfrastructure( this IServiceCollection services, IConfiguration configuration )
         {
             InitDB( services );
@@ -68,7 +69,7 @@ namespace Infrastructure
             services.AddHttpClient<IAIService, AIService>();
 
             services.ConfigureHttpClientDefaults(conf => conf.ConfigureHttpClient(conf => {
-                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "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");
+                conf.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _aiApiAuthToken);
                 conf.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             }));
         }
