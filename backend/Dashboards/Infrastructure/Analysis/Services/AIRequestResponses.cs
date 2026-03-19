@@ -5,7 +5,7 @@ namespace Infrastructure.Analysis.Services
     public class ChatRequest
     {
         [JsonPropertyName("model")]
-        public string Model { get; set; } = "stepfun/step-3.5-flash:free";
+        public string Model { get; set; } = Environment.GetEnvironmentVariable("AI_MODEL") ?? String.Empty;
         [JsonPropertyName("messages")]
         public Message[] Messages { get; set; }
         [JsonPropertyName("reasoning")]
