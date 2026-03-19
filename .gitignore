@@ -3,6 +3,7 @@ Thumbs.db
 
 .vscode/
 .idea/
+.vs/
 
 .env
 .env.*
@@ -12,3 +13,5 @@ Thumbs.db
 
 **/.docker/
 docker-compose.override.yml
+node_modules/
+metabase-data/

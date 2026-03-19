@@ -1,0 +1,40 @@
+:root {
+  --tui-font-text: 'Roboto', 'Helvetica Neue', sans-serif;
+  --tui-text-primary: #212121;
+}
+
+body {
+  margin: 0;
+  background-color: #EEE;
+  min-height: 100vh;
+}
+
+tui-root {
+  border-image: initial !important;
+}
+
+.host-container {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  gap: 1rem;
+}
+
+.remote-slot {
+  background: var(--tui-background-base);
+  border-radius: var(--tui-radius-l);
+  min-height: 850px;
+  padding: 1.5rem;
+
+  dashboards-mft {
+    display: block;
+    width: 100%;
+  }
+}

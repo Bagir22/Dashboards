@@ -1,0 +1,215 @@
+@import '@taiga-ui/core/styles/taiga-ui-local';
+
+:root {
+  --tui-font-text: 'Roboto', 'Helvetica Neue', sans-serif;
+  --tui-text-primary: #212121;
+  --tui-text-primary-on-accent-2: #393939;
+  --tui-background-accent-1: #0D9DDE;
+  --tui-background-accent-1-hover: #15ACF0;
+  --tui-background-accent-1-pressed: #15ACF0;
+  --action-button-height: 44px;
+}
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.mft-wrapper {
+  padding: 1rem;
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    height: var(--action-button-height);
+
+    tui-textfield {
+      width: 350px;
+      height: 100%;
+      top: 6px;
+
+      .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 42%;
+        transform: translateY(-50%);
+        font-size: 1.25rem;
+        z-index: 2;
+      }
+
+      [tuiTextfield] {
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+        height: var(--action-button-height);
+      }
+
+      .clear-button {
+        position: absolute;
+        right: 0.25rem;
+        top: 42%;
+        transform: translate(-20%, -50%);
+        z-index: 2;
+        color: var(--tui-text-tertiary);
+
+        &:hover {
+          color: var(--tui-text-secondary);
+        }
+      }
+    }
+
+    a[tuiButton] {
+      height: var(--action-button-height);
+      border-radius: var(--tui-radius-m);
+      font-size: 1.125rem;
+      padding: 0 1.5rem;
+    }
+  }
+
+  .main-content-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    width: 100%;
+
+    .dashboard-section {
+      flex: 1;
+      min-width: 0;
+
+      .tabs-container {
+        width: 100%;
+        margin-bottom: 1rem;
+        font-weight: bold;
+
+        [tuiTab] {
+          &._active,
+          &:hover {
+            color: var(--tui-text-primary-on-accent-2);
+          }
+        }
+      }
+
+      .actions-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        align-items: center;
+        width: 100%;
+
+        .ai-assistant-container,
+        .download-container {
+          display: flex;
+
+          button[tuiIconButton] {
+            width: var(--action-button-height);
+            border-radius: var(--tui-radius-m);
+            border: 1px solid var(--tui-text-tertiary);
+            background-color: var(--tui-background-base-alt);
+            opacity: 0.9;
+
+            .material-icons-outlined {
+              color: var(--tui-text-secondary);
+              font-size: 1.5rem;
+            }
+
+            &:hover {
+              background: var(--tui-background-neutral-1-hover);
+              opacity: 1;
+            }
+          }
+        }
+
+        .ai-assistant-container button[tuiIconButton].active {
+          background: var(--tui-background-accent-1);
+          border: none;
+
+          &:hover {
+            background: var(--tui-background-accent-1-hover);
+          }
+
+          .material-icons-outlined {
+            color: var(--tui-text-primary-on-accent-1);
+          }
+        }
+
+        button[tuiButton] {
+          border-radius: var(--tui-radius-m);
+          font-size: 1.125rem;
+          font-weight: 600;
+          padding: 0 1.5rem;
+
+          background-color: #C4D8E3;
+          color: var(--tui-text-primary-on-accent-1);
+          border: none;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: #CBE4F1;
+          }
+
+          &:active {
+            background-color: #79959e !important;
+          }
+
+          .material-icons-outlined {
+            font-size: 1.5rem;
+            font-weight: normal;
+          }
+        }
+      }
+
+      .iframe-container {
+        width: 100%;
+        padding-top: 1rem;
+
+        .dashboard-iframe {
+          width: 100%;
+          height: 850px;
+          border: none;
+          border-radius: var(--tui-radius-m);
+        }
+      }
+    }
+
+    .ai-sidebar {
+      width: 400px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 1rem;
+      background: var(--tui-background-base);
+      border-radius: var(--tui-radius-m);
+      animation: slideIn 0.3s ease-out;
+    }
+  }
+
+  .loading-state,
+  .empty-state {
+    padding: 5rem 1rem;
+    text-align: center;
+    color: var(--tui-text-tertiary);
+    font-size: 1rem;
+    font-weight: 600;
+    width: 100%;
+    display: block;
+  }
+}
+
+.material-icons-outlined {
+  font-family: 'Material Icons Outlined';
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+tui-data-list button[tuiOption] {
+  width: 100%;
+  height: var(--tui-height-m);
+  font-size: 1.25rem;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}

@@ -1,16 +1,12 @@
-FROM node:20 AS build
+FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+
+RUN npm install --legacy-peer-deps && npm cache clean --force
 
 COPY . .
-RUN npm run build
 
-FROM nginx:alpine
+RUN npm install -g @angular/cli --legacy-peer-deps
 
-COPY nginx.conf /etc/nginx/nginx.conf
-
-COPY --from=build /app/dist /usr/share/nginx/html
-
-EXPOSE 80
+EXPOSE 4200 4201

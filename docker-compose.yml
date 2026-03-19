@@ -1,28 +1,101 @@
-version: "3.9"
-
 services:
-  postgres:
-    image: postgres:16
-    env_file: .env
+  db: 
+    image: postgres:15
+    restart: always
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - metabase_db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase_app
+    ports:
+      - "${METABASE_PORT}:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: ${POSTGRES_DB}
+      MB_DB_PORT: 5432
+      MB_DB_USER: ${POSTGRES_USER}
+      MB_DB_PASS: ${POSTGRES_PASSWORD}
+      MB_DB_HOST: db
+      MB_JETTY_HOST: 0.0.0.0
+      MB_EMBEDDED_APP_ORIGIN: "http://${BASE_URL}:${HOST_PORT},http://${BASE_URL}:${MFT_DASH_PORT}"
+    volumes:
+      - ./metabase-data:/metabase-data 
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - app-network
+  
   backend:
     build:
       context: ./backend/Dashboards
-    env_file: .env
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTPS_PORT: 443
+      DB_CONNECTION_STRING: Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};IncludeErrorDetail=true
+    platform: linux/amd64
+    env_file:
+      - .env
     depends_on:
-      - postgres
+      - db
+      - metabase
+    restart: unless-stopped
+    networks:
+      - app-network
 
-  frontend:
-    build:
+  host-app:
+    build: 
       context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "80:80"
-    depends_on:
-      - backend
+      - "${HOST_PORT}:${HOST_PORT}"
+    volumes:
+      - ./frontend:/app  
+    environment:
+      - METABASE_URL=http://${BASE_URL}:${METABASE_PORT}
+      - MFT_URL=http://${BASE_URL}:${MFT_DASH_PORT}
+      - CHOKIDAR_USEPOLLING=true
+    command: npx ng serve host --host 0.0.0.0 --port ${HOST_PORT} --disable-host-check --public-host http://${BASE_URL}:${HOST_PORT} --poll 2000
+    networks:
+      - app-network
+
+  dashboards-mft:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "${MFT_DASH_PORT}:${MFT_DASH_PORT}"
+    environment:
+      - BASE_URL=${BASE_URL}
+      - METABASE_PORT=${METABASE_PORT}
+      - MFT_URL=http://${BASE_URL}:${MFT_DASH_PORT}
+      - METABASE_URL=http://${BASE_URL}:${METABASE_PORT}
+      - METABASE_USER=${METABASE_USER}
+      - METABASE_PASS=${METABASE_PASS}
+      - CHOKIDAR_USEPOLLING=true
+    command: npx ng serve dashboards --host 0.0.0.0 --port ${MFT_DASH_PORT} --disable-host-check --poll 2000
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
-  pgdata:
+  metabase_db_data:
+  host_node_modules:
+  mft_node_modules:

@@ -2,36 +2,49 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
-    "dashboards": {
+    "host": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "scss",
+          "standalone": false
         }
       },
-      "root": "",
-      "sourceRoot": "src",
+      "root": "projects/host",
+      "sourceRoot": "projects/host/src",
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular/build:application",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "browser": "src/main.ts",
-            "tsConfig": "tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
+            "customWebpackConfig": {
+              "path": "./projects/host/webpack.config.js"
+            },
+            "outputPath": "dist/host",
+            "index": "projects/host/src/index.html",
+            "main": "projects/host/src/main.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "projects/host/tsconfig.app.json",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
+              "projects/host/src/favicon.ico",
+              "projects/host/src/assets"
             ],
             "styles": [
-              "src/styles.scss"
-            ]
+              "projects/host/src/styles.scss",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-theme.less",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-fonts.less",
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules"
+              ]
+            },
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -58,7 +71,90 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
+          "builder": "@angular-builders/custom-webpack:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "host:build:production"
+            },
+            "development": {
+              "buildTarget": "host:build:development"
+            }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "buildTarget": "host:build",
+            "port": 4200
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "host:build"
+          }
+        }
+      }
+    },
+    "dashboards": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss",
+          "standalone": false
+        }
+      },
+      "root": "projects/dashboards",
+      "sourceRoot": "projects/dashboards/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-builders/custom-webpack:browser",
+          "options": {
+            "customWebpackConfig": {
+              "path": "./projects/dashboards/webpack.config.js"
+            },
+            "outputPath": "dist/dashboards",
+            "index": "projects/dashboards/src/index.html",
+            "main": "projects/dashboards/src/main.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "projects/dashboards/tsconfig.app.json",
+            "assets": [
+              "projects/dashboards/src/favicon.ico",
+              "projects/dashboards/src/assets"
+            ],
+            "styles": [
+              "projects/dashboards/src/styles.scss",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-theme.less",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-fonts.less"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-builders/custom-webpack:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "dashboards:build:production"
@@ -67,10 +163,24 @@
               "buildTarget": "dashboards:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "buildTarget": "dashboards:build",
+            "port": 4201,
+            "publicHost": "http://localhost:4201",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            },
+            "servePath": "/",
+            "liveReload": true,
+            "hmr": false
+          }
         },
-        "test": {
-          "builder": "@angular/build:unit-test"
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "dashboards:build"
+          }
         }
       }
     }

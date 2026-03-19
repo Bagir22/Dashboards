@@ -1,0 +1,135 @@
+<tui-root>
+  <div class="mft-wrapper">
+    @if (isLoading) {
+      <div class="loading-state">Загрузка дашбордов...</div>
+    } @else {
+      <div class="top-row">
+        <tui-textfield>
+          <span class="material-icons-outlined search-icon">search</span>
+          <input
+            tuiTextfield
+            placeholder="Поиск"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange()"
+          />
+          @if (searchQuery) {
+            <button
+              type="button"
+              class="clear-button"
+              (click)="clearSearch()"
+              tuiIconButton
+              size="xs"
+            >
+              <span class="material-icons-outlined">close</span>
+            </button>
+          }
+        </tui-textfield>
+
+        <div class="actions-wrapper">
+          @if (isAdmin) {
+            <a
+              tuiButton
+              appearance="primary"
+              size="m"
+              target="_blank"
+              [href]="adminUrl"
+            >
+              Панель администрирования
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="main-content-layout">
+        <div class="dashboard-section">
+          @if (filteredDashboards.length > 0) {
+            <tui-tabs
+              class="tabs-container"
+              [activeItemIndex]="filteredActiveIndex"
+              (activeItemIndexChange)="onTabClick($event)"
+            >
+              @for (dash of filteredDashboards; track dash.id) {
+                <button tuiTab type="button">
+                  {{ dash.name }}
+                </button>
+              }
+            </tui-tabs>
+
+            @if (safeUrl) {
+              <div class="actions-wrapper">
+                <div class="ai-assistant-container">
+                  <button
+                    tuiIconButton
+                    type="button"
+                    appearance="primary"
+                    size="m"
+                    [class.active]="showAiAssistant"
+                    (click)="toggleAiAssistant()"
+                    [tuiHint]="showAiAssistant ? 'Скрыть помощника' : 'Показать помощника'"
+                  >
+                    <span class="material-icons-outlined">smart_toy</span>
+                  </button>
+                </div>
+
+                <div class="download-container">
+                  <button
+                    tuiIconButton
+                    type="button"
+                    appearance="primary"
+                    size="m"
+                    [tuiDropdown]="exportMenu"
+                    [tuiDropdownManual]="isExportMenuOpen"
+                    (click)="onDropdownClick()"
+                    (tuiActiveZoneChange)="onActiveZone($event)"
+                  >
+                    <span class="material-icons-outlined">file_download</span>
+                  </button>
+
+                  <ng-template #exportMenu>
+                    <tui-data-list class="export-list">
+                      @for (format of exportFormats; track format) {
+                        <button tuiOption (click)="downloadDashboard(format)">
+                          {{ format.toUpperCase() }}
+                        </button>
+                      }
+                    </tui-data-list>
+                  </ng-template>
+                </div>
+                <button
+                  tuiButton
+                  type="button"
+                  appearance="primary"
+                  size="m"
+                  (click)="resetDashboard()"
+                >
+                  Очистить фильтры
+                </button>
+              </div>
+            }
+          }
+
+          @if (dashboards.length === 0) {
+            <div class="empty-state">Дашборды не найдены.</div>
+          } @else if (filteredDashboards.length === 0) {
+            <div class="empty-state">По вашему запросу ничего не найдено.</div>
+          } @else if (safeUrl) {
+            <div class="iframe-container">
+              <iframe [src]="safeUrl" class="dashboard-iframe"></iframe>
+            </div>
+          }
+        </div>
+
+        @if (showAiAssistant) {
+          <div class="ai-sidebar">
+            <app-ai-assistant
+              [currentDashboardName]="getCurrentDashboardName()"
+              [currentDashboardId]="getCurrentDashboardId()"
+              [baseUrl]="metabaseUrl"
+              (close)="toggleAiAssistant()">
+            </app-ai-assistant>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</tui-root>
