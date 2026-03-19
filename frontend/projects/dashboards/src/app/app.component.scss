@@ -2,6 +2,7 @@
 
 :root {
   --tui-font-text: 'Roboto', 'Helvetica Neue', sans-serif;
+  --tui-font-heading: var(--tui-font-text);
   --tui-text-primary: #212121;
   --tui-text-primary-on-accent-2: #393939;
   --tui-background-accent-1: #0D9DDE;
@@ -30,6 +31,10 @@
       width: 350px;
       height: 100%;
       top: 6px;
+
+      .t-clear {
+        display: none !important;
+      }
 
       .search-icon {
         position: absolute;
@@ -219,6 +224,33 @@ tui-hint {
 
   span {
     color: var(--tui-text-primary-on-accent-2);
+  }
+}
+
+tui-dialog {
+  .t-content {
+    border-radius: var(--tui-radius-m) !important;
+
+    .t-button {
+      border: 1px solid var(--tui-text-tertiary);
+      color: var(--tui-text-secondary);
+    }
+
+    [tuiAppearance][data-appearance='primary'] {
+      color: var(--tui-text-primary-on-accent-1);
+    }
+  }
+
+  .t-close {
+    border-radius: var(--tui-radius-s) !important;
+
+    &::before {
+      color: var(--tui-text-tertiary);
+    }
+
+    &:hover::before {
+      color: var(--tui-text-secondary);
+    }
   }
 }
 

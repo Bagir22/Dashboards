@@ -32,12 +32,17 @@
             "tsConfig": "projects/host/tsconfig.app.json",
             "assets": [
               "projects/host/src/favicon.ico",
-              "projects/host/src/assets"
+              "projects/host/src/assets",
+              {
+                "output": "assets/taiga-ui/icons",
+                "glob": "**/*",
+                "input": "node_modules/@taiga-ui/icons/src"
+              }
             ],
             "styles": [
               "projects/host/src/styles.scss",
               "node_modules/@taiga-ui/core/styles/taiga-ui-theme.less",
-              "node_modules/@taiga-ui/core/styles/taiga-ui-fonts.less",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-fonts.less"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [

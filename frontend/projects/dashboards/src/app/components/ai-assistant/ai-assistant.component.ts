@@ -6,8 +6,9 @@ import { lastValueFrom } from 'rxjs';
 import { MetabaseService } from '../../services/metabase.service';
 import { TabCard, TabInfo } from '../../models/metabase.model';
 import { DateHelper } from '../../helpers/date-helper';
-import { TuiButton, TuiHint } from '@taiga-ui/core';
+import { TuiButton, TuiDialogService, TuiHint } from '@taiga-ui/core';
 import { Message, MessagesHistory } from '../../models/ai.model';
+import { TUI_CONFIRM, TuiConfirmData } from "@taiga-ui/kit";
 
 @Component({
   selector: 'app-ai-assistant',
@@ -40,6 +41,8 @@ export class AiAssistantComponent implements OnChanges, OnInit {
   private sanitizer = inject(DomSanitizer);
   private metabaseService = inject(MetabaseService);
   private apiAnalysisUrl = 'http://localhost:8080/api/analysis/';
+
+  private readonly dialogs = inject(TuiDialogService);
 
   constructor() {
     marked.setOptions({breaks: true, gfm: true});
@@ -139,19 +142,31 @@ export class AiAssistantComponent implements OnChanges, OnInit {
     }
   }
 
-  /**
-   * Очистка истории сообщений
-   */
-  protected clearHistory(): void {
-    if (confirm('Очистить историю сообщений?')) {
-      const dashboardHistoryIndex = this.history.findIndex((history) => history.dashboardId === this.currentDashboardId);
-      this.history.splice(dashboardHistoryIndex, 1);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.history));
-      if (!this.history.length) localStorage.removeItem(this.STORAGE_KEY);
-      this.messages = [];
-      this.addWelcomeMessage();
-      this.scrollToBottom();
-    }
+  protected onClear(): void {
+    const data: TuiConfirmData = {
+      content: 'Это действие нельзя отменить',
+      yes: 'Очистить',
+      no: 'Отмена',
+    };
+
+    this.dialogs
+      .open<boolean>(TUI_CONFIRM, {
+        label: 'Очистить историю сообщений?',
+        size: 's',
+        data,
+      }).subscribe((response) => {
+        if (response) this.clearHistory();
+      });
+  }
+
+  private clearHistory(): void {
+    const dashboardHistoryIndex = this.history.findIndex((history) => history.dashboardId === this.currentDashboardId);
+    this.history.splice(dashboardHistoryIndex, 1);
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.history));
+    if (!this.history.length) localStorage.removeItem(this.STORAGE_KEY);
+    this.messages = [];
+    this.addWelcomeMessage();
+    this.scrollToBottom();
   }
 
   private async getCards() {

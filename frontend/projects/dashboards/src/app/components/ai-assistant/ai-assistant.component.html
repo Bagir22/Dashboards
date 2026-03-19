@@ -22,7 +22,7 @@
       <button
         *ngIf="messages.length > 1 && !isLoading"
         class="clear-history-btn"
-        (click)="clearHistory()"
+        (click)="onClear()"
         tuiHint="Очистить историю"
       >
         <span class="material-icons-outlined">delete_outline</span>
