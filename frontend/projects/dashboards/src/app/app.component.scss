@@ -7,7 +7,7 @@
   --tui-background-accent-1: #0D9DDE;
   --tui-background-accent-1-hover: #15ACF0;
   --tui-background-accent-1-pressed: #15ACF0;
-  --header-element-height: 44px;
+  --action-button-height: 44px;
 }
 
 :host {
@@ -24,11 +24,12 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
-    height: var(--header-element-height);
+    height: var(--action-button-height);
 
     tui-textfield {
       width: 350px;
       height: 100%;
+      top: 6px;
 
       .search-icon {
         position: absolute;
@@ -42,7 +43,7 @@
       [tuiTextfield] {
         padding-left: 2.5rem;
         padding-right: 2.5rem;
-        height: var(--header-element-height) !important;
+        height: var(--action-button-height);
       }
 
       .clear-button {
@@ -53,6 +54,10 @@
         z-index: 2;
         color: var(--tui-text-tertiary);
 
+        .material-icons-outlined {
+          font-size: 20px;
+        }
+
         &:hover {
           color: var(--tui-text-secondary);
         }
@@ -60,7 +65,7 @@
     }
 
     a[tuiButton] {
-      height: var(--header-element-height);
+      height: var(--action-button-height);
       border-radius: var(--tui-radius-m);
       font-size: 1.125rem;
       padding: 0 1.5rem;
@@ -102,28 +107,34 @@
           display: flex;
 
           button[tuiIconButton] {
-            width: var(--header-element-height);
+            width: var(--action-button-height);
             border-radius: var(--tui-radius-m);
+            border: 1px solid var(--tui-text-tertiary);
+            background-color: var(--tui-background-base-alt);
+            opacity: 0.9;
 
             .material-icons-outlined {
-              color: var(--tui-text-primary-on-accent-1);
+              color: var(--tui-text-secondary);
               font-size: 1.5rem;
             }
 
-            &.active {
-              background: var(--tui-background-accent-1) !important;
-              border: none !important;
-              box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-
-              &:hover {
-                filter: brightness(1.1);
-                box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
-              }
-
-              .material-icons-outlined {
-                color: var(--tui-text-primary-on-accent-1) !important;
-              }
+            &:hover {
+              background: var(--tui-background-neutral-1-hover);
+              opacity: 1;
             }
+          }
+        }
+
+        .ai-assistant-container button[tuiIconButton].active {
+          background: var(--tui-background-accent-1);
+          border: none;
+
+          &:hover {
+            background: var(--tui-background-accent-1-hover);
+          }
+
+          .material-icons-outlined {
+            color: var(--tui-text-primary-on-accent-1);
           }
         }
 
@@ -133,14 +144,13 @@
           font-weight: 600;
           padding: 0 1.5rem;
 
-          background-color: #a7c9da !important;
-          color: white !important;
+          background-color: #C4D8E3;
+          color: var(--tui-text-primary-on-accent-1);
           border: none;
           transition: all 0.2s ease;
 
           &:hover {
-            background-color: #809aa6 !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background-color: #CBE4F1;
           }
 
           &:active {
@@ -172,7 +182,7 @@
       flex-shrink: 0;
       position: sticky;
       top: 1rem;
-      background: var(--tui-base-01);
+      background: var(--tui-background-base);
       border-radius: var(--tui-radius-m);
       animation: slideIn 0.3s ease-out;
     }
@@ -183,7 +193,7 @@
     padding: 5rem 1rem;
     text-align: center;
     color: var(--tui-text-tertiary);
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
     width: 100%;
     display: block;
@@ -201,6 +211,15 @@ tui-data-list button[tuiOption] {
   width: 100%;
   height: var(--tui-height-m);
   font-size: 1.25rem;
+}
+
+tui-hint {
+  box-shadow: 0 2px 4px -1px #0003, 0 4px 5px #00000024, 0 1px 10px #0000001f;
+  background-color: var(--tui-background-base) !important;
+
+  span {
+    color: var(--tui-text-primary-on-accent-2);
+  }
 }
 
 @keyframes slideIn {

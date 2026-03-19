@@ -2,10 +2,11 @@ import { Component, ViewChild, ElementRef, inject, Input, Output, EventEmitter, 
 import { CommonModule } from '@angular/common';
 import { marked } from 'marked';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MetabaseService } from '../../services/metabase.service';
 import { lastValueFrom } from 'rxjs';
+import { MetabaseService } from '../../services/metabase.service';
 import { TabCard, TabInfo } from '../../models/metabase.model';
 import { DateHelper } from '../../helpers/date-helper';
+import {TuiButton, TuiHint} from "@taiga-ui/core";
 
 export interface Message {
   text: string;
@@ -17,7 +18,7 @@ export interface Message {
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TuiButton, TuiHint],
   templateUrl: './ai-assistant.component.html',
   styleUrls: ['./ai-assistant.component.scss']
 })
@@ -113,7 +114,7 @@ export class AiAssistantComponent implements OnChanges, OnInit {
    */
   private addWelcomeMessage(): void {
     this.messages.push({
-      text: 'Здравствуйте! Я ИИ-ассистент. Выберите что мне проанализировать для вас.',
+      text: 'Здравствуйте! Я ИИ-ассистент. Что вы хотите проанализировать?',
       isUser: false,
       timestamp: new Date(),
       isNotification: true,

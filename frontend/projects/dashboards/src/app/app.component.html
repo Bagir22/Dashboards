@@ -19,7 +19,6 @@
               (click)="clearSearch()"
               tuiIconButton
               size="xs"
-              appearance="flat"
             >
               <span class="material-icons-outlined">close</span>
             </button>
@@ -66,7 +65,7 @@
                     size="m"
                     [class.active]="showAiAssistant"
                     (click)="toggleAiAssistant()"
-                    [tuiHint]="showAiAssistant ? 'Скрыть помощника' : 'Показать помощника'"
+                    tuiHint="ИИ-ассистент"
                   >
                     <span class="material-icons-outlined">smart_toy</span>
                   </button>
@@ -82,6 +81,7 @@
                     [tuiDropdownManual]="isExportMenuOpen"
                     (click)="onDropdownClick()"
                     (tuiActiveZoneChange)="onActiveZone($event)"
+                    tuiHint="Скачать данные дашборда"
                   >
                     <span class="material-icons-outlined">file_download</span>
                   </button>

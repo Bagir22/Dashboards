@@ -2,26 +2,41 @@
   <div class="ai-header">
     <div class="header-left">
       <h3>ИИ-ассистент</h3>
-      <span class="dashboard-indicator" *ngIf="currentDashboardName" [title]="'Анализ дашборда: ' + currentDashboardName">
+      <span class="dashboard-indicator"
+        *ngIf="currentDashboardName"
+        [tuiHint]="'Анализ дашборда: ' + currentDashboardName"
+      >
         <span class="material-icons-outlined">analytics</span>
         {{ currentDashboardName }}
       </span>
     </div>
     <div class="header-right">
       <button
+        *ngIf="isLoading && currentStreamingMessage"
+        class="cancel-btn"
+        (click)="cancelRequest()"
+        tuiHint="Отменить запрос"
+      >
+        <span class="material-icons-outlined">stop_circle</span>
+      </button>
+      <button
+        *ngIf="messages.length > 1 && !isLoading"
         class="clear-history-btn"
         (click)="clearHistory()"
-        *ngIf="messages.length > 1 && !isLoading"
-        title="Очистить историю"
+        tuiHint="Очистить историю"
       >
         <span class="material-icons-outlined">delete_outline</span>
       </button>
       <button
+        *ngIf="!isLoading"
+        type="button"
         class="close-btn"
         (click)="close.emit()"
-        *ngIf="!isLoading"
-        title="Закрыть">
-        ✕
+        tuiIconButton
+        size="xs"
+        tuiHint="Закрыть"
+      >
+        <span class="material-icons-outlined">close</span>
       </button>
     </div>
   </div>
@@ -41,7 +56,7 @@
               *ngIf="!msg.isUser && !msg.isNotification && msg.text"
               class="copy-btn"
               (click)="copyToClipboard(msg.text, i)"
-              [title]="copySuccess === i ? 'Скопировано!' : 'Копировать ответ'"
+              [tuiHint]="copySuccess === i ? 'Ответ скопирован' : 'Копировать ответ'"
               [class.copy-success]="copySuccess === i"
             >
               @if (copySuccess === i) {
@@ -58,41 +73,37 @@
     <div *ngIf="isLoading && currentStreamingMessage" class="streaming-indicator">
       <span class="typing-indicator">Печатает...</span>
     </div>
-
-    <button
-      *ngIf="isLoading && currentStreamingMessage"
-      class="cancel-btn"
-      (click)="cancelRequest()"
-      title="Отменить запрос">
-      <span class="cancel-text">Отмена</span>
-    </button>
   </div>
 
   <div class="actions-grid" *ngIf="groupedCardsbyTabs">
     @if (selectedTabIndex !== undefined) {
-      @if (groupedCardsbyTabs[selectedTabIndex].id) {
+      <div class="top">
+        @if (groupedCardsbyTabs[selectedTabIndex].id) {
+          <button
+            class="action-btn default"
+            [disabled]="isLoading"
+            (click)="clearChoice()"
+          >
+            <span class="action-text">Назад</span>
+          </button>
+        }
         <button
           class="action-btn"
           [disabled]="isLoading"
-          (click)="clearChoice()">
-          <span class="action-text">Назад</span>
+          (click)="executeAction(groupedCardsbyTabs[selectedTabIndex])"
+        >
+          <span class="action-text">
+            {{ groupedCardsbyTabs[selectedTabIndex].name ?? 'Дашборд' }}
+          </span>
         </button>
-      }
-      <button
-        class="action-btn"
-        [disabled]="isLoading"
-        (click)="executeAction(groupedCardsbyTabs[selectedTabIndex])">
-        <span class="action-text">
-          {{ groupedCardsbyTabs[selectedTabIndex].name ? 'Вкладка ' + groupedCardsbyTabs[selectedTabIndex].name : 'Дашборд' }}
-        </span>
-      </button>
+      </div>
       @if (groupedCardsbyTabs[selectedTabIndex].cards.length > 1) {
         <button
           *ngFor="let card of groupedCardsbyTabs[selectedTabIndex].cards"
           class="action-btn"
           [disabled]="isLoading"
           (click)="executeAction(card)">
-          <span class="action-text"> График {{ card.name }}</span>
+          <span class="action-text">{{ card.name }}</span>
         </button>
       }
     } @else {
@@ -101,7 +112,7 @@
           class="action-btn"
           [disabled]="isLoading"
           (click)="executeAction(tab, i)">
-          <span class="action-text">Вкладка {{ tab.name }}</span>
+          <span class="action-text">{{ tab.name }}</span>
         </button>
       </div>
     }

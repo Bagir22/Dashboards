@@ -28,7 +28,7 @@ tui-root {
 }
 
 .remote-slot {
-  background: #FFF;
+  background: var(--tui-background-base);
   border-radius: var(--tui-radius-l);
   min-height: 850px;
   padding: 1.5rem;
