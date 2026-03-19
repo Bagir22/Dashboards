@@ -26,7 +26,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.ETLPipeline
+namespace Infrastructure.ETLPipeline.Synchronize
 {
     internal class DataSynchronizer(
         IUniDashDbContext dbContext,

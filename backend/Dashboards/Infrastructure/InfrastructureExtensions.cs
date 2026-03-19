@@ -26,6 +26,7 @@ using Infrastructure.ETLPipeline.Extract.StudentAcademicState;
 using Infrastructure.ETLPipeline.Extract.StudyForm;
 using Infrastructure.ETLPipeline.Extract.TrainingLevel;
 using Infrastructure.ETLPipeline.Extract.Utils;
+using Infrastructure.ETLPipeline.Synchronize;
 using Infrastructure.Metabase;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

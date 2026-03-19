@@ -1,4 +1,4 @@
-namespace Infrastructure.ETLPipeline
+namespace Infrastructure.ETLPipeline.Synchronize
 {
     public interface IDataSynchronizer
     {
