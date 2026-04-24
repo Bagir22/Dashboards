@@ -1,0 +1,45 @@
+@startuml
+!include <C4/C4>
+!include <C4/C4_Container>
+
+title Container Diagram for Сервис Дашборды
+top to bottom direction
+
+Person(admin, "Администратор", "Создает и настраивает дашборды")
+Person(user, "Пользователь", "Просматривает дашборды, экспортирует данные")
+
+System_Boundary(system, "Сервис Дашборды") {
+    Container(client, "Web-приложение", "Angular + TypeScript", "Приложение для просмотра дашбордов")
+
+    System_Boundary(core_services, "Сервисы") {
+        Container(ai_service, "ИИ-сервис", ".NET Core", "Формирование отчета по дашбордам")
+        Container(pipeline, "Сервис ETL-pipeline", ".NET Core", "Извлечение, обработка и сохранение данных в бд")
+    }
+
+    Boundary(db, "Базы данных") {
+        ContainerDb(dicts, "Dictionaries", "PostgreSQL Database Schema", "Хранит данные о справочниках")
+        ContainerDb(university, "University", "PostgreSQL Database Schema", "Хранит данные о сущностях вуза (студент, ведомость, приказ)")
+    }
+}
+
+System_Ext(metabase, "Система визуализации Metabase", "Визуализация дашбордов")
+System_Ext(univuz, "Платформа ЮНИВУЗ-3", "Исходные данные для анализа")
+
+
+Rel(admin, metabase, "Посещает", "HTTPS")
+
+Rel(admin, client, "Посещает", "HTTPS")
+Rel(user, client, "Посещает", "HTTPS")
+
+Rel(client, ai_service, "Запрашивает", "HTTPS")
+Rel(client, metabase, "Запрашивает", "HTTPS")
+Rel(ai_service, metabase, "Запрашивает", "HTTP")
+
+Rel(pipeline, univuz, "Запрашивает", "HTTPS")
+
+Rel(pipeline, dicts, "", "EFCore ORM")
+Rel(pipeline, university, "", "EFCore ORM")
+
+Rel(metabase, university, "", "JDBC Driver")
+
+@enduml

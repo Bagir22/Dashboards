@@ -1,0 +1,57 @@
+@startuml
+!include <C4/C4>
+!include <C4/C4_Container>
+
+title Container Diagram for Сервис Дашборды
+top to bottom direction
+
+Person(admin, "Администратор", "Создает и настраивает дашборды")
+Person(user, "Пользователь", "Просматривает дашборды, экспортирует данные")
+
+System_Boundary(system, "Сервис Дашборды") {
+
+    Boundary(front_services, "Контейнеры Angular") {
+        Container(client, "Host-приложение", "Angular + TypeScript", "Приложение для встраивания дашбордов")
+        Container(mft, "Dashboards", "Angular + TypeScript", "Приложение для просмотра дашбордов")
+    }
+
+    Rel(client, mft, "", "remote-entry")
+
+    Boundary(core_services, "Контейнеры .NET Core") {
+        Container(ai_service, "ИИ-сервис", ".NET Core", "Формирование отчета по дашбордам")
+        Container(pipeline, "Сервис ETL-pipeline", ".NET Core", "Извлечение, обработка и сохранение данных в бд")
+    }
+
+    Boundary(db, "PostgreSQL кластер") {
+        ContainerDb(dicts, "Dictionaries", "PostgreSQL", "Хранит данные о справочниках")
+        ContainerDb(university, "Students", "PostgreSQL", "Хранит данные о студентах")
+        ContainerDb(achivs, "Achievements", "PostgreSQL", "Хранит данные о достижениях")
+        ContainerDb(orders, "Orders", "PostgreSQL", "Хранит данные о приказах")
+        ContainerDb(sheets, "Sheets", "PostgreSQL", "Хранит данные о ведомостях")
+    }
+}
+
+System_Ext(metabase, "Система визуализации Metabase", "Визуализация дашбордов")
+System_Ext(univuz, "Платформа ЮНИВУЗ-3", "Исходные данные для анализа")
+
+
+Rel(admin, metabase, "Посещает", "HTTPS")
+
+Rel(admin, client, "Посещает", "HTTPS")
+Rel(user, client, "Посещает", "HTTPS")
+
+Rel(mft, ai_service, "Запрашивает", "HTTPS")
+Rel(mft, metabase, "Запрашивает", "HTTPS")
+Rel(ai_service, metabase, "Запрашивает", "HTTP")
+
+Rel(pipeline, univuz, "Запрашивает", "HTTPS")
+
+Rel(pipeline, dicts, "Чтение/Запись", "EFCore ORM")
+Rel(pipeline, university, "Чтение/Запись", "EFCore ORM")
+
+Rel(metabase, university, "", "JDBC Driver")
+Rel(metabase, achivs, "", "JDBC Driver")
+Rel(metabase, orders, "", "JDBC Driver")
+Rel(metabase, sheets, "", "JDBC Driver")
+
+@enduml

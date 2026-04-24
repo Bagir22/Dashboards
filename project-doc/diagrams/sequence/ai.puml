@@ -1,0 +1,89 @@
+@startuml
+' Настройка внешнего вида
+skinparam participantPadding 20
+skinparam boxPadding 10
+skinparam sequenceMessageAlign center
+
+actor       Пользователь as user
+participant "Клиент (Фронтенд)" as front
+participant "ИИ сервис (backend)" as backend
+database    "Metabase" as metabase
+participant "LLM" as ai
+
+== Инициация запроса ==
+user -> front : 1. Нажимает кнопку "ИИ-помощник"
+activate front
+
+front --> user : 2. Открывает окно "ИИ-помощник"
+user -> front : 3. Выбирает опцию "Анализ дашборда"
+
+front -> front : 4. Отображает индикатор\n"Анализирую данные..."
+note right: Анимация загрузки
+
+front -> backend : 5. POST /api/analysis/stream
+activate backend
+deactivate front
+
+backend -> metabase : 6. GET /api/metabase/dashboard/{id}/data
+activate metabase
+
+metabase --> backend : 7. Возвращает данные всех виджетов\n(JSON с метаданными и значениями)
+deactivate metabase
+
+backend -> backend : 8. Формирует структурированный\nпромпт для ИИ
+note right: Данные виджетов,\nзначения фильтров,\nметаданные дашборда
+
+backend -> ai : 9. POST openrouter.ai/api/v1/chat/completion\n(промпт + данные, потоковый режим)
+activate ai
+deactivate backend
+
+ai --> ai : 10. Начинает генерацию\nтекстового анализа
+
+== Потоковая передача SSE ==
+ai --> backend : 11. Чанк 1
+activate backend
+backend --> front : 12. Пересылает чанк 1
+activate front
+front -> front : 13. Добавляет чанк 1 в\nобласть вывода
+front --> user : 14. Отображает частичный\nтекст анализа
+deactivate front
+deactivate backend
+
+ai --> backend : 15. Чанк 2
+activate backend
+backend --> front : 16. Пересылает чанк 2
+activate front
+front -> front : 17. Добавляет чанк 2 к тексту
+front --> user : 18. Дополняет отображение
+deactivate front
+deactivate backend
+
+ai --> backend : 19. Чанк 3
+activate backend
+backend --> front : 20. Пересылает чанк 3
+activate front
+front -> front : 21. Добавляет финальный чанк
+front --> user : 22. Отображает полный текст
+deactivate front
+deactivate backend
+
+ai --> backend : 23. [DONE] Завершение потока
+activate backend
+backend --> front : 24. [DONE] Завершение потока
+activate front
+front -> front : 25. Скрывает индикатор загрузки,\nактивирует кнопку "Копировать"
+deactivate backend
+deactivate front
+
+deactivate ai
+deactivate backend
+deactivate front
+
+== Пользователь копирует результат ==
+user -> front : 26. Нажимает "Копировать"
+activate front
+front -> front : 27. Копирует текст в буфер обмена
+front --> user : 28. Отображает "Текст скопирован"\n(2 секунды)
+deactivate front
+
+@enduml

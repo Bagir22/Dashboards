@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4>
+!include <C4/C4_Context>
+
+title System Context Diagram for Сервис Дашборды
+top to bottom direction
+
+Person(admin, "Администратор", "Создает и настраивает дашборды")
+Person(user, "Пользователь", "Просматривает дашборды, экспортирует данные")
+
+System(system, "Сервис Дашборды", "Позволяет просматривать дашборды, экспортировать данные, генерировать аналитический текстовый вывод")
+
+System_Ext(metabase, "Система визуализации Metabase", "Визуализация дашбордов")
+System_Ext(univuz, "Платформа ЮНИВУЗ-3", "Исходные данные для анализа")
+
+Rel(admin, system, "Просматривает дашборды", "HTTPS")
+Rel(admin, metabase, "Создает и настраивает дашборды", "HTTPS")
+Rel(user, system, "Просматривает дашборды", "HTTPS")
+Rel(system, metabase, "Запрос на получение дашбордов", "HTTP")
+Rel(system, univuz, "Запросы на получение исходных данных", "HTTPS")
+
+@enduml
